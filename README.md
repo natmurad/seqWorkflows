@@ -1,5 +1,9 @@
 # :dna: Workflows for analysis of sequencing data
 
+
+> **Warning**
+>  To run this workflow it is necessary to have [snakemake](https://snakemake.github.io) and [Singularity](https://sylabs.io/) installed on the computer.
+
 ## Quality control
 
   - fastqc

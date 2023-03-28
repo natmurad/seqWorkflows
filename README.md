@@ -25,5 +25,5 @@
   
 ## Download public data using SRA-tools
   
-  - prefectch
+  - prefetch
   - fastq-dump

@@ -14,6 +14,10 @@
 
 
 
+*It is also possible to create new workflows just combining rules by including in the main Snakefile.*
+
+
+
 ## Quality control
 
 ```snakemake -s qC[SE/PE] -j <N_OF_JOBS> --use-singularity --singularity-args "-B <DATA_DIRECTORY>" ```
@@ -38,11 +42,23 @@
 
 ```snakemake -s denovo[SE/PE] -j <N_OF_JOBS> --use-singularity --singularity-args "-B <DATA_DIRECTORY>" ```
 
+### Assembly
+
   - trinity - assembly
-  - busco
+  - busco - checking quality
   - cdhit - remove redundance
-  - dammit - annotation
+  
+### Annotation ([Trinotate pipeline](https://rnabio.org/module-07-trinotate/0007/02/01/Trinotate/))
+
+  - TransDecoder
+  - Blastp & blastx against uniprot
+  - signalP
+  - trinotate
+  
+### Differential Expression Analysis
+
   - align and estimate abundance (RSEM)
+  
   
 ## Download public data using SRA-tools
   

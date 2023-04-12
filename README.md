@@ -53,6 +53,7 @@
   - TransDecoder
   - Blastp & blastx against uniprot
   - signalP
+  - HMMSCAN
   - trinotate
   
 ### Differential Expression Analysis

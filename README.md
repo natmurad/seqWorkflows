@@ -5,8 +5,27 @@
 >  To run this workflow it is necessary to have [snakemake](https://snakemake.github.io) and [Singularity](https://sylabs.io/) installed on the computer.
 
 
+## Files needed to run the pipeline
+
+  - Raw fastq.gz files or SRA list
+  
+ **Map to reference**
+ 
+  - Reference and gff file downloaded from ENSEMBL.
+ 
+ **De novo assembly**
+ 
+  - sample_file.txt (draft in the folder data) :arrow_right: it must be located on the input directory.
+
+
+## Running
 
   **First of all, set the file *config.yaml* with the name of your samples, directories and other settings.**
+  
+> **Warning**
+> Do not forget of change the name of the samples and directories in the config.yaml file
+
+
 
   **Command to run:**
 
@@ -69,6 +88,8 @@
   
   
 ## Download public data using SRA-tools
+
+ These rules can be included in the workflow if you want to start it from the SRA list. It will download the files and perform the fastq-dump step to generate the fastq files.
   
   - prefetch
   - fastq-dump

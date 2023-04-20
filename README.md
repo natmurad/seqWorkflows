@@ -59,6 +59,13 @@
 ### Differential Expression Analysis
 
   - align and estimate abundance (RSEM)
+  - abundance to matrix
+  - run DE analysis
+  
+### GOSeq
+
+  - create files needed
+  - run GOSeq analysis
   
   
 ## Download public data using SRA-tools

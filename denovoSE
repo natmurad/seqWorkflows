@@ -1,7 +1,7 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/bigrock/FurmanLab/Natalia/seqWorkflows/deNovoAssembly/config.yaml"
+configfile: "/config/configSE.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -54,15 +54,15 @@ rule all:
     input:
     ###------ QUALITY CONTROL ------###
 #     fastqc output before trimming
-       # fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # fastqc output after trimming
         trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-      #  html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-   #     zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # merged reports before trimming
-      #  raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-       # trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
 
 
     ###------ ASSEMBLY ------###
@@ -91,9 +91,9 @@ rule all:
     # signal p
         signalp = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt",
     # trinotate
-      #  sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
-     #   xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
-     #   xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
+        sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
+        xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
+        xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
         go = OUT_STEP_ANNOTATION + "go_annotations.txt",
 
 
@@ -114,7 +114,7 @@ rule all:
 ###############################################################################
 #################          QUALITY REPORT RAW DATA          ###################
 ###############################################################################
-#include:	"rules/SE/fastqcRAW.smk"
+include:	"rules/SE/fastqcRAW.smk"
 
 ###############################################################################
 #########################          TRIMMING          ##########################

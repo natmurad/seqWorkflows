@@ -1,14 +1,14 @@
 ##################################################################################
 ########################          SAMPLES          ###############################
 ##################################################################################
-samples: "Diacama_sp_gamergate_gaster_DRX022365 Diacama_sp_gamergate_gaster_DRX022370 Diacama_sp_gamergate_gaster_DRX022375
-Diacama_sp_worker_gaster_DRX022366 Diacama_sp_worker_gaster_DRX022371 Diacama_sp_worker_gaster_DRX022376"
+samples: "SAMPLE1 SAMPLE2 SAMPLE3 SAMPLE4
+SAMPLE5 SAMPLE6 SAMPLE7 SAMPLE8"
 
 lane: ""
 
 fq: ".fastq.gz"
 
-reads: "_1 _2"
+reads: ""
 ##################################################################################
 ########################        STEP NAMES         ###############################
 ##################################################################################
@@ -25,23 +25,24 @@ step_annotation: annotation/
 ###########################        INFO        ###################################
 ##################################################################################
 # adapters
-adapters: "TruSeq3-PE-2.fa"
+adapters: "TruSeq3-SE-2.fa"
 
 # threads
-threads: 10
+threads: 50
 
 ## Directories
 # Base data dir
-base_dir: /home/buckcenter.org/nmurad/
+base_dir: /home/user/
 
 # Change to location of all raw .sam files
-raw_data_dir: /home/buckcenter.org/nmurad/antsrnaseq/Diacammasp/
+raw_data_dir: /home/user/data/specie/
 
 # Path to trimmed reads output
-trimmed_dir: /home/buckcenter.org/nmurad/antsrnaseq/Diacammasp/trimmed/
+trimmed_dir: /home/user/data/specie/trimmed/
 
 # Path to assembly output
-assembly_dir: /home/buckcenter.org/nmurad/antsrnaseq/Diacammasp/assembly_trinity/
+assembly_dir: /home/user/data/specie/assembly_trinity/
 
 # Path to bowtie index
-btIndex_dir: /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/btIndex/
+btIndex_dir: /home/user/data/specie/btIndex/
+

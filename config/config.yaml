@@ -1,64 +1,44 @@
-##################################################################################
-########################          SAMPLES          ###############################
-##################################################################################
-samples: "Tnyladeri_queen_abdomen_SAMN16591861	Tnyladeri_queen_abdomen_SAMN16591864	 Tnyladeri_worker_abdomen_SAMN16591867
-Tnyladeri_queen_abdomen_SAMN16591862	Tnyladeri_worker_abdomen_SAMN16591865  Tnyladeri_worker_abdomen_SAMN16591868
-Tnyladeri_queen_abdomen_SAMN16591863	Tnyladeri_worker_abdomen_SAMN16591866"
+## Samples
+samples: "SAMPLE1 SAMPLE2 SAMPLE3 SAMPLE4
+SAMPLE5 SAMPLE6 SAMPLE7 SAMPLE8"
 
 lane: ""
 
-fq: ".fastq.gz"
+fq: "fastq.gz"
 
-reads: ""
-##################################################################################
-########################        STEP NAMES         ###############################
-##################################################################################
-step_qC: qC/ # quality control
-step_assembly: assembly_trinity/ # assembly
-step_map: map/ # align to assembly 
-step_counts: counts/ # counts
-step_transdecoder: transdecoder/
-step_cdhit: cdHit/
-step_annotation: annotation/
+## Step names
+step_qC: qC # quality control
+step_map: map # map to reference
+step_counts: counts # counts
 
-
-##################################################################################
-###########################        INFO        ###################################
-##################################################################################
+## Info
 # adapters
-adapters: "TruSeq3-SE-2.fa"
+adapters: /home/user/adapters.fa
 
 # threads
 threads: 50
 
 ## Directories
 # Base data dir
-base_dir: /home/buckcenter.org/nmurad/
+base_dir: /home/user/
 
 # Change to location of all raw .sam files
-raw_data_dir: /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/
+raw_data_dir: /home/user/specie/
 
 # Path to trimmed reads output
-trimmed_dir: /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/trimmed/
-
-# Path to assembly output
-assembly_dir: /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/assembly_trinity/
-
-# Path to bowtie index
-btIndex_dir: /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/btIndex/
+trimmed_dir: /home/user/specie/trimmed/
 
 # Path to reference genome
-#ref_genome: /home/genome/Mus_musculus.GRCm39.dna.toplevel.fa
+ref_genome: /home/user/specie/GCF_013373865.1_ASM1337386v2_genomic.fna
 
 # Path to gtf file
-#gtf_file: /home/genome/Mus_musculus.GRCm39.105.gtf
+gtf_file: /home/user/specie/GCF_013373865.1_ASM1337386v2_genomic.gff
 
 # Genome index dir
-#genomeindexdir: /home/genome/Human/starIndex/
+genomeindexdir: /home/user/specie/starIndex/
 
 # Rsem prepare ref dir
-#rsemprepref: /home/genome/Human/rsemRef/
+rsemprepref: /home/user/specie/rsemRef/
 
 # Reference prefix
-#prefix_ref: "human_ref"
-
+prefix_ref: "specie_ref"

@@ -1,0 +1,7 @@
+name: trinity_env
+channels:
+  - bioconda
+dependencies:
+  - python=3.7
+  - bowtie2=2.5.1
+  - trinity

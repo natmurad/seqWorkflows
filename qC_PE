@@ -1,0 +1,91 @@
+###############################################################################
+##########################          CONFIG          ###########################
+###############################################################################
+configfile: "/Users/natmurad/Documents/Buck/GCRLE/antsRNAseq/Diacammasp/config.yaml"
+
+###############################################################################
+########################          LIBRARIES          ##########################
+###############################################################################
+import io 
+import os
+import shutil
+import pandas as pd
+import pathlib
+import time
+from snakemake.exceptions import print_exception, WorkflowError
+
+start = time.time()
+
+###############################################################################
+######################          SET VARIABLES          ########################
+###############################################################################
+THREADS = config["threads"]
+
+STEP_QC = config["step_qC"] # quality control
+
+SAMPLES = config["samples"].split() # sample files
+LANE = config["lane"]
+NUM = config["reads"].split()
+FQ = config["fq"]
+READS = config["reads"].split()
+ADAPTERS = config["adapters"] # adapters sequences
+
+
+INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
+DIR = config["base_dir"] # /home/user/
+TRIMMEDDIR = config["trimmed_dir"]
+
+OUT_STEP_QC = os.path.join(DIR, STEP_QC) # /home/dataset/qC
+
+###############################################################################
+#########################          RULE ALL          ##########################
+###############################################################################
+rule all:
+    input:
+#     fastqc output before trimming
+        fastq_html = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_1_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_zip = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_1_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html2 = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_zip2 = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+    # fastqc output after trimming
+        trimmed = expand("{trim_dir}{sample}{lane}_1_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
+        html_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_1_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_1_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        trimmed2 = expand("{trim_dir}{sample}{lane}_2_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
+        html_trim2 = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_2_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        zip_trim2 = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_2_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+    # merged reports before trimming
+        raw_html = OUT_STEP_QC + "/fastqcRaw/multiqc_report.html",
+    #       raw_stats = OUT_STEP_QC + "/fastqcRaw/multiqc_data/multiqc_general_stats.txt",
+    # merged reports after trimming
+        trim_html = OUT_STEP_QC + "/fastqcTrim/multiqc_report.html",
+#        trim_stats = OUT_STEP_QC + "/fastqcTrim/multiqc_data/multiqc_general_stats.txt",
+
+
+###############################################################################
+#################          QUALITY REPORT RAW DATA          ###################
+###############################################################################
+include:	"rules/PE/fastqcRAW.smk"
+
+###############################################################################
+#########################          TRIMMING          ##########################
+###############################################################################
+include:	"rules/PE/trimmomatic.smk"
+
+###############################################################################
+###############          QUALITY REPORT TRIMMED DATA          #################
+###############################################################################
+include:	"rules/PE/fastqcTRIM.smk"
+
+###############################################################################
+######################          MERGE REPORTS          ########################
+###############################################################################
+include:	"rules/PE/multiqc.smk"
+
+onsuccess:
+    print("\n\n#######################################################\n")
+    print("########------ QUALITY CONTROL FINISHED!------#########\n")
+    print("#######################################################\n")
+    print("\n\nRunning time in minutes: %s\n" % round((time.time() - start)/60,1))
+    shutil.rmtree(".snakemake")
+

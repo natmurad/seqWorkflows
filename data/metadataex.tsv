@@ -1,0 +1,13 @@
+ID,Sample,treat1,treat2,interaction
+cond1_1,1,control,control,control 
+cond1_2,2,control,control,control 
+cond1_3,4,control,control,control
+cond2_1,1,control,treat,controltreat2
+cond2_2,2,control,treat,controltreat2
+cond2_3,4,control,treat,controltreat2
+cond3_1,1,treat,control,treat1Control
+cond3_2,2,treat,control,treat1Control
+cond3_3,4,treat,control,treat1Control
+cond4_1,1,treat,treat,treat1_treat2
+cond4_2,2,treat,treat,treat1_treat2
+cond4_3,4,treat,treat,treat1_treat2

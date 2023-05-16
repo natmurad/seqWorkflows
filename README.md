@@ -15,7 +15,7 @@
  
  **De novo assembly**
  
-  - sample_file.txt (draft in the folder data) :arrow_right: it must be located on the input directory.
+  - *sample_file.txt* and *constrast_file.txt* (drafts in the folder data) :arrow_right: it must be located on the input directory.
 
 
 ## Running
@@ -35,7 +35,12 @@
 
 *It is also possible to create new workflows just combining rules by including in the main Snakefile.*
 
+## Download public data using SRA-tools
 
+ These rules can be included in the workflow if you want to start it from the SRA list. It will download the files and perform the fastq-dump step to generate the fastq files.
+  
+  - prefetch
+  - fastq-dump
 
 ## Quality control
 
@@ -86,10 +91,6 @@
   - create files needed
   - run GOSeq analysis
   
+## Genome-guided transcriptome assembly
   
-## Download public data using SRA-tools
 
- These rules can be included in the workflow if you want to start it from the SRA list. It will download the files and perform the fastq-dump step to generate the fastq files.
-  
-  - prefetch
-  - fastq-dump

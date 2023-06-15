@@ -96,13 +96,6 @@
 ## Genome-guided transcriptome assembly
 
 ```snakemake -s refguided[SE/PE] -j <N_OF_JOBS> --use-singularity --singularity-args "-B <DATA_DIRECTORY>" ```
-
-### Quality Control
-
-  - fastqc
-  - trimmomatic
-  - fastqc
-  - multiqc
   
 ### Sort alignment
   

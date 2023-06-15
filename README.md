@@ -37,6 +37,8 @@
 
 ## Download public data using SRA-tools
 
+```snakemake -s sra -j <N_OF_JOBS> --use-singularity --singularity-args "-B <DATA_DIRECTORY>" ```
+
  These rules can be included in the workflow if you want to start it from the SRA list. It will download the files and perform the fastq-dump step to generate the fastq files.
   
   - prefetch
@@ -92,5 +94,43 @@
   - run GOSeq analysis
   
 ## Genome-guided transcriptome assembly
-  
 
+```snakemake -s refguided[SE/PE] -j <N_OF_JOBS> --use-singularity --singularity-args "-B <DATA_DIRECTORY>" ```
+
+### Quality Control
+
+  - fastqc
+  - trimmomatic
+  - fastqc
+  - multiqc
+  
+### Sort alignment
+  
+  - RSEM
+  - STAR
+  - samtools
+
+### Guided assembly
+
+  - trinity - assembly
+  - busco - checking quality
+  - cdhit - remove redundance
+  
+### Annotation ([Trinotate pipeline](https://rnabio.org/module-07-trinotate/0007/02/01/Trinotate/))
+
+  - TransDecoder
+  - Blastp & blastx against uniprot
+  - signalP
+  - HMMSCAN
+  - trinotate
+  
+### Differential Expression Analysis
+
+  - align and estimate abundance (RSEM)
+  - abundance to matrix
+  - run DE analysis
+  
+### GOSeq
+
+  - create files needed
+  - run GOSeq analysis

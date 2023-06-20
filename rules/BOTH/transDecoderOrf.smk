@@ -4,7 +4,7 @@
 
 rule transcoder_orf:
     input:
-        assembly =  ASSEMBLYDIR + ASSEMBLY
+        assembly =  ASSEMBLYDIR + "trinity.Trinity.fasta"
     output:
         pep = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
         cds = OUT_STEP_TRANSDECODER + "longest_orfs.cds",

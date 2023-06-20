@@ -4,7 +4,7 @@
 
 rule blastp:
     input:
-        pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
+        pep = OUT_STEP_TRANSDECODER + "trinity.Trinity.fasta.transdecoder.pep",
         uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
         pdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb"
     output:

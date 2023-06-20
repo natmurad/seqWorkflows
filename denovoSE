@@ -1,7 +1,7 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configDenovoSE.yaml"
+configfile: "/config/configSE.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -36,7 +36,7 @@ INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
 TRIMMEDDIR =  config['trimmed_dir'] # os.path.join(DIR, "/trimmed/")
 ASSEMBLYDIR = config['assembly_dir']
-ASSEMBLY = config['assembly_name']
+BTINDEX = config['btIndex_dir']
 
 OUT_STEP_QC = os.path.join(INPUTDIR, STEP_QC) # /home/dataset/qC
 OUT_STEP_ASSEMBLY = os.path.join(INPUTDIR, STEP_ASSEMBLY) # /home/dataset/map
@@ -52,32 +52,32 @@ OUT_STEP_DOWNLOAD = os.path.join(DIR, 'data/') # /home/data
 ###############################################################################
 rule all:
     input:
- #################################################------ QUALITY CONTROL ------##################################################
+    ###------ QUALITY CONTROL ------###
 #     fastqc output before trimming
-       # fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # fastqc output after trimming
         trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-      #  html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-   #     zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # merged reports before trimming
-      #  raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-       # trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
 
 
-   #################################################------ ASSEMBLY ------######################################################
+    ###------ ASSEMBLY ------###
     # trinity assembly
-        assembly = ASSEMBLYDIR + ASSEMBLY,
+        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta",
     # cdhit
         assemblyfilt = OUT_STEP_CDHIT + "NRCDS_Trinity.fasta.cdhit",
     # busco
         busco = OUT_STEP_ANNOTATION + "busco/out/short_summary.specific.hymenoptera_odb10.out.txt",
 
 
-    #################################################------ ANNOTATION ------###################################################
+    ###------ ANNOTATION ------###
     # transDecoder
         long_orfs = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
-        pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
+        pep = OUT_STEP_TRANSDECODER + "trinity.Trinity.fasta.transdecoder.pep",
     # uniprot
         uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
         blastdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb",
@@ -91,19 +91,19 @@ rule all:
     # signal p
         signalp = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt",
     # trinotate
-      #  sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
-     #   xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
-     #   xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
+        sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
+        xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
+        xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
         go = OUT_STEP_ANNOTATION + "go_annotations.txt",
 
 
-    ############################################------ DIFFERENTIAL EXPRESSION ------############################################
+    ###------ DIFFERENTIAL EXPRESSION ------###
         counts = expand("{out_dir}{sample}{lane}/RSEM.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
         mtx =  OUT_STEP_COUNTS + "RSEM.isoform.counts.matrix",
      #   assemblyfiltexp = ASSEMBLYDIR + "Trinity.filt.fasta",
+    ###------ GO ANALYSIS ------###
 
 
-    ##############################################------ GO ANALYSIS ------######################################################
         factorLabel = INPUTDIR + "diff_exp/DESeq2_gene/factor_labeling.txt",
         seqLens = INPUTDIR + "diff_exp/Trinity.fasta.seq_lens",
         gene_lengths = INPUTDIR + "Trinity.gene_lengths.txt",
@@ -114,7 +114,7 @@ rule all:
 ###############################################################################
 #################          QUALITY REPORT RAW DATA          ###################
 ###############################################################################
-#include:	"rules/SE/fastqcRAW.smk"
+include:	"rules/SE/fastqcRAW.smk"
 
 ###############################################################################
 #########################          TRIMMING          ##########################
@@ -166,7 +166,7 @@ include:	"rules/BOTH/cdhit.smk"
 include:	"rules/SE/trinity_align_and_estimate_abundance.smk"
 
 ###############################################################################
-###################           FILTER BY EXPRESSION       ######################
+###################           ABUNDANCE TO MATRIX        ######################
 ###############################################################################
 #include:	"rules/BOTH/trinity_filter_by_rsem.smk"
 

@@ -1,7 +1,7 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configPreprocessSE.yaml"
+configfile: "/Users/natmurad/Documents/rnaseqExNeuronsLong/config.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -27,19 +27,18 @@ STEP_COUNTS = config["step_counts"] # quantify counts
 
 SAMPLES = config["samples"].split() # sample files
 LANE = config["lane"]
+NUM = config["reads"].split()
 FQ = config["fq"]
 
 ADAPTERS = config["adapters"] # adapters sequences
 REF_GENOME = config["ref_genome"]
-GTF_GFF = config["gtf_gff"]
 GTF_FILE = config["gtf_file"]
 PREF = config["prefix_ref"]
-READS = ""
 
 INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
 TRIMMEDDIR = config["trimmed_dir"] # /home/dataset/trimmed
-STARINDEXDIR = config['rsemprepref'] # /home/dataset/reference
+STARINDEXDIR = config['genomeindexdir'] # /home/dataset/reference
 RSEMPREPREF = config['rsemprepref'] # # /home/dataset/reference
 
 OUT_STEP_QC = os.path.join(DIR, STEP_QC) # /home/dataset/qC
@@ -52,22 +51,22 @@ OUT_STEP_COUNTS = os.path.join(DIR, STEP_COUNTS) # /home/dataset/counts
 rule all:
     input:
 #     fastqc output before trimming
-        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        fastq_zip = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_zip = expand("{out_dir_name}/fastqcRaw/{sample}{lane}_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # fastqc output after trimming
         trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        zip_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        html_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
    # merged reports before trimming
-        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = OUT_STEP_QC + "/fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = OUT_STEP_QC + "/fastqcTrim/multiqc_report.html",
     # reference for alignments
-        rsemref = RSEMPREPREF + PREF + ".seq",
+       # rsemref = RSEMPREPREF + PREF + ".seq",
     # star align
-        reads_map = expand("{out_dir}{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
+     #   reads_map = expand("{out_dir}/{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
     # rsem
-        counts = expand("{out_dir}{sample}{lane}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
+    #    counts = expand("{out_dir}/{sample}{lane}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
 
 
 
@@ -89,22 +88,22 @@ include:	"rules/SE/fastqcTRIM.smk"
 ###############################################################################
 ######################          MERGE REPORTS          ########################
 ###############################################################################
-include:	"rules/BOTH/multiqc.smk"
+include:	"rules/SE/multiqc.smk"
 
 ###############################################################################
 ###################        RSEM PREPARE REFERENCE        ######################
 ###############################################################################
-include:	"rules/BOTH/rsemref.smk"
+#include:	"rules/SE/rsemref.smk"
 
 ###############################################################################
 ######################          STAR MAPPING           ########################
 ###############################################################################
-include:	"rules/SE/starmap.smk"
+#include:	"rules/SE/starmap.smk"
 
 ###############################################################################
 ######################          RSEM COUNTS            ########################
 ###############################################################################
-include:	"rules/SE/rsemcounts.smk"
+# include:	"rules/SE/rsemcounts.smk"
 
 onsuccess:
     print("\n\n#######################################################\n")

@@ -5,7 +5,7 @@
 rule align_and_estimate_abundance:
     input:
         single = TRIMMEDDIR + "{sample}{lane}" + "_trimmed.fq.gz",
-        assembly = ASSEMBLYDIR + ASSEMBLY
+        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta"
     params:
         seqType = 'fq',
         est_method = 'RSEM',

@@ -1,7 +1,7 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configDenovoPE.yaml"
+configfile: "/home/config/configPE.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -35,8 +35,7 @@ INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
 TRIMMEDDIR =  config['trimmed_dir'] # os.path.join(DIR, "/trimmed/")
 ASSEMBLYDIR = config['assembly_dir']
-ASSEMBLY = config['assembly_name']
-#BTINDEX = config['btIndex_dir']
+BTINDEX = config['btIndex_dir']
 
 OUT_STEP_QC = os.path.join(INPUTDIR, STEP_QC) # /home/dataset/qC
 OUT_STEP_ASSEMBLY = os.path.join(INPUTDIR, STEP_ASSEMBLY) # /home/dataset/map
@@ -73,7 +72,7 @@ rule all:
 
     ###------ ASSEMBLY ------###
     # trinity assembly
-        assembly = ASSEMBLYDIR + ASSEMBLY,
+        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta",
     # cdhit
         assemblyfilt = OUT_STEP_CDHIT + "NRCDS_Trinity.fasta.cdhit",
     # busco

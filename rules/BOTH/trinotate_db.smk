@@ -4,8 +4,8 @@
 
 rule trinotate:
     input:
-        assembly = ASSEMBLYDIR + ASSEMBLY,
-        genes_map = ASSEMBLYDIR + ASSEMBLY + ".gene_trans_map",
+        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta",
+        genes_map = ASSEMBLYDIR + "trinity.Trinity.fasta.gene_trans_map",
         pep = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
         outfmt6 = OUT_STEP_ANNOTATION + "uniprot.blastp.outfmt6",
         trinotatesqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite"

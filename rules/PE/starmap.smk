@@ -7,14 +7,14 @@ rule map:
         read2 = TRIMMEDDIR + "{sample}{lane}" + "_2_trimmed.fq.gz",
         refdir = STARINDEXDIR
     output:
-        align = OUT_STEP_MAP + "{sample}{lane}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
-        talign = OUT_STEP_MAP + "{sample}{lane}Aligned.toTranscriptome.out.bam"
+        align = OUT_STEP_MAP + "/{sample}{lane}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
+        talign = OUT_STEP_MAP + "/{sample}{lane}Aligned.toTranscriptome.out.bam"
     message: "\n\n######------ MAPPING READS WITH STAR - SAMPLE = {wildcards.sample} ------######\n"
     params:
         t = THREADS,
-        outPref =  OUT_STEP_MAP + "{sample}{lane}"
+        outPref =  OUT_STEP_MAP + "/{sample}{lane}"
     singularity:
-        "docker://dceoy/star"
+        "docker://quay.io/biocontainers/star"
     shell:"""
         rm -rf {params.outPref}
         mkdir -p {params.outPref}

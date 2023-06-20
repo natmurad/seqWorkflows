@@ -3,19 +3,16 @@
 ###############################################################################
 
 rule build_db:
-    input:
-        assembly = ASSEMBLYDIR + ASSEMBLY,
-        pep = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
-        outfmt6 = OUT_STEP_ANNOTATION + "uniprot.blastx.outfmt6",
     output:
-       # trinotatesqlite = OUT_STEP_DOWNLOAD + "Trinotate.sqlite",
-        trinotatesqlite_cp = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
+        trinotatesqlite = OUT_STEP_DOWNLOAD + "Trinotate.sqlite",
+        trinotatesqlite_cp = OUT_STEP_ANNOTATION + "Trinotate.sqlite"
     params:
-        db = OUT_STEP_ANNOTATION + "Trinotate",
-       # dir = OUT_STEP_DOWNLOAD
+        db = OUT_STEP_DOWNLOAD + "Trinotate",
+        dir = OUT_STEP_DOWNLOAD
     message: "\n\n######------ DOWNLOAD TRINOTATE SQLITE DB ------######\n"
     singularity:
-        "docker://trinityrnaseq/trinotate"
+        "docker://ss93/trinotate-3.2.1"
     shell:"""
-        /usr/local/src/Trinotate/util/admin//Build_Trinotate_Boilerplate_SQLite_db.pl {params.db}
+        Build_Trinotate_Boilerplate_SQLite_db.pl {params.db} &&
+        cp {output.trinotatesqlite} {output.trinotatesqlite_cp}
         """

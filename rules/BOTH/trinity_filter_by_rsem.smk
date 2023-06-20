@@ -5,7 +5,7 @@
 rule filter_fasta_by_rsem_values:
     input:
         rsem_out = expand("{out_dir}{sample}{lane}/RSEM.isoforms.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
-        assembly = OUT_STEP_ASSEMBLY + ASSEMBLY
+        assembly = OUT_STEP_ASSEMBLY + "trinity.Trinity.fasta"
     params:
         tpm_cutoff = 1,
         isopct_cutoff = 10,

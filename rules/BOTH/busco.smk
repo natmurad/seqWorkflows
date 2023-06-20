@@ -4,7 +4,7 @@
 
 rule BUSCO:
     input:
-        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta",
+        assembly = ASSEMBLYDIR + ASSEMBLY,
     output:
         busco = OUT_STEP_ANNOTATION + "busco/out/short_summary.specific.hymenoptera_odb10.out.txt"
     params:

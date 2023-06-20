@@ -3,7 +3,6 @@
 ###############################################################################
 
 rule calculate_exp:
-
     input:
         bam = OUT_STEP_MAP + "{sample}Aligned.toTranscriptome.out.bam"
     params:
@@ -12,8 +11,10 @@ rule calculate_exp:
         pref = PREF,
         outPref =  OUT_STEP_COUNTS + "{sample}"
     singularity:
-        "docker://quay.io/biocontainers/rsem"
+        "docker://dceoy/rsem"
     output:
         align =  OUT_STEP_COUNTS + "{sample}.genes.results"
     shell:"""
-        rsem-calculate-expression --star --num-threads {params.t} --alignments --estimate-rspd --no-bam-output {input.bam} {params.r}
+        rsem-calculate-expression --bam --no-bam-output -p {params.t} \
+        {input.bam} {params.rsemRef}{params.pref} {params.outPref}
+    """

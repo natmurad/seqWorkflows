@@ -4,7 +4,7 @@
 
 rule cdhit:
     input:
-        trinity =  ASSEMBLYDIR + "trinity.Trinity.fasta",
+        trinity =  ASSEMBLYDIR + ASSEMBLY,
     output:
         assemblyfilt = OUT_STEP_CDHIT + "NRCDS_Trinity.fasta.cdhit" 
     params:

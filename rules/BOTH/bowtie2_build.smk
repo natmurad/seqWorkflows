@@ -8,7 +8,7 @@
 
 rule bowtie2_build:
     input:
-        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta"
+        assembly = ASSEMBLYDIR + ASSEMBLY
     output:
         index = directory(BTINDEX),
         index4 =  BTINDEX + "trinity.4.bt2"

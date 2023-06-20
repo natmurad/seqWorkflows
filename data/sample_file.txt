@@ -1,6 +1,0 @@
-A       conditionA_rep1
-A       conditionA_rep2
-A       conditionA_rep3
-B       conditionB_rep1
-B       conditionB_rep2
-B       conditionB_rep3

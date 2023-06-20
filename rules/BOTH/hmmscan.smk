@@ -4,7 +4,7 @@
 
 rule HMMSCAN:
     input:
-        pep =  OUT_STEP_TRANSDECODER + "trinity.Trinity.fasta.transdecoder.pep",
+        pep =  OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
         db = OUT_STEP_DOWNLOAD + "Pfam-A.hmm"
     output:
         out = OUT_STEP_ANNOTATION + "TrinotatePFAM.out" 

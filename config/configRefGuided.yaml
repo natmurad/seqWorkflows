@@ -8,10 +8,9 @@ lane: ""
 
 fq: ".fastq.gz"
 
-reads: "_1 _2"
+reads: ""
 
 contrasts: "A_vs_B"
-
 ##################################################################################
 ########################        STEP NAMES         ###############################
 ##################################################################################
@@ -28,10 +27,10 @@ step_annotation: annotation/
 ###########################        INFO        ###################################
 ##################################################################################
 # adapters
-adapters: "TruSeq3-PE-2.fa"
+adapters: "TruSeq2-SE.fa"
 
 # threads
-threads: 10
+threads: 20
 
 ## Directories
 # Base data dir
@@ -44,6 +43,23 @@ raw_data_dir: /home/user/rnaseq/specie/
 trimmed_dir: /home/user/rnaseq/specie/trimmed/
 
 # Path to assembly output
-assembly_dir: /home/user/rnaseq/specie/assembly_trinity/
-assembly_name: "trinity.Trinity.fasta"
+assembly_dir:/home/user/rnaseq/specie/assembly_trinity/trinity/
 
+# Assembly file name
+assembly_name: Trinity-GG.fasta
+#trinity.Trinity.fasta
+# Path to bowtie index
+#btIndex_dir: /home/buckcenter.org/nmurad/antsrnaseq/Hsaltator/btIndex/
+
+# Path to reference genome
+ref_genome: /home/user/rnaseq/specie/reference_from_ensembl.fa
+
+# Path to gtf file
+gtf_file: /home/user/rnaseq/specie/annotation_file_from_ensembl.gff
+gtf_gff: --gff3
+
+# Rsem prepare ref dir
+rsemprepref: /home/user/rnaseq/specie/genomeIndex/
+
+# Reference prefix
+prefix_ref: "specie_ref"

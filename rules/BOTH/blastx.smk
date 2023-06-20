@@ -4,7 +4,7 @@
 
 rule blastx:
     input:
-        pep = ASSEMBLYDIR + "trinity.Trinity.fasta",
+        pep = ASSEMBLYDIR + ASSEMBLY,
         uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
         pdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb"
     output:

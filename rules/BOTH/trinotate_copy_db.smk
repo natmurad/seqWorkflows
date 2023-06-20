@@ -2,7 +2,7 @@
 ######################         TRINOTATE SQLITE DB     ########################
 ###############################################################################
 
-rule build_db:
+rule copy_db:
     input:
         assembly = ASSEMBLYDIR + ASSEMBLY,
         pep = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
@@ -10,12 +10,9 @@ rule build_db:
     output:
        # trinotatesqlite = OUT_STEP_DOWNLOAD + "Trinotate.sqlite",
         trinotatesqlite_cp = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
-    params:
-        db = OUT_STEP_ANNOTATION + "Trinotate",
-       # dir = OUT_STEP_DOWNLOAD
     message: "\n\n######------ DOWNLOAD TRINOTATE SQLITE DB ------######\n"
     singularity:
         "docker://trinityrnaseq/trinotate"
     shell:"""
-        /usr/local/src/Trinotate/util/admin//Build_Trinotate_Boilerplate_SQLite_db.pl {params.db}
+        cp data/Trinotate.sqlite {output.trinotatesqlite_cp}
         """

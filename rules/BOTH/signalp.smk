@@ -4,7 +4,7 @@
 
 rule signalp:
     input:
-        pep = OUT_STEP_TRANSDECODER + "trinity.Trinity.fasta.transdecoder.pep",
+        pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
     output:
         out = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt"
     params:

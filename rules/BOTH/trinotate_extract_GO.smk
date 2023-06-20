@@ -4,7 +4,7 @@
 
 rule extract_go:
     input:
-        xls = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls"
+        xls = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls"
     output:
         go = OUT_STEP_ANNOTATION + "go_annotations.txt"
     params:

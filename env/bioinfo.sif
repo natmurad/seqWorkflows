@@ -1,5 +1,0 @@
-Bootstrap: docker
-From: continuumio/anaconda3
-
-%post
-    conda install -c bioconda bowtie2=2.5.1 fastqc=0.12.1 multiqc=1.14 star=2.7.10b trimmomatic=0.39 rsem=1.3.3

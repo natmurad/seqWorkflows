@@ -5,7 +5,7 @@
 rule abundance_to_matrix:
     input:
         counts = expand("{out_dir}{sample}{lane}/RSEM.isoforms.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
-        gene_trans_map = ASSEMBLYDIR + "trinity.Trinity.fasta.gene_trans_map"
+        gene_trans_map = ASSEMBLYDIR + ASSEMBLY + ".gene_trans_map"
     params:
         seqType = 'fq',
         est_method = 'RSEM',

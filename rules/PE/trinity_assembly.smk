@@ -9,15 +9,15 @@ rule trinity_assembly:
         right= expand("{trim_dir}{sample}{lane}_2_trimmed.fq.gz", trim_dir = TRIMMEDDIR,
                      sample = SAMPLES, lane = LANE)
     output:
-        assembly = ASSEMBLYDIR + "trinity.Trinity.fasta",
-        gene_trans_map = ASSEMBLYDIR + "trinity.Trinity.fasta.gene_trans_map"
+        assembly = ASSEMBLYDIR + ASSEMBLY,
+        gene_trans_map = ASSEMBLYDIR + ASSEMBLY + ".gene_trans_map"
     params:
         left = lambda wildcards: ",".join(expand("{trim_dir}{sample}{lane}_1_trimmed.fq.gz", trim_dir = TRIMMEDDIR,
                     sample = SAMPLES, lane = LANE)),
         right = lambda wildcards: ",".join(expand("{trim_dir}{sample}{lane}_2_trimmed.fq.gz", trim_dir = TRIMMEDDIR,
                     sample = SAMPLES, lane = LANE)),
         t = THREADS,
-        out = ASSEMBLYDIR + "trinity",
+        out = ASSEMBLYDIR,
         mem = '50G',
         seqType = 'fq'
     singularity:

@@ -4,9 +4,9 @@
 
 rule prefetch:
     input:
-        sralist =  INPUTDIR + "SRAList.txt",
+        sralist =  INPUTDIR + "SraAccList.txt",
     output:
-        fastq = INPUTDIR + "/{samples}" + FQ
+        srafile = INPUTDIR + "{samples}.sra"
     params:
         out_dir = INPUTDIR
     singularity:

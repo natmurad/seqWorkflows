@@ -9,15 +9,19 @@ rule prepare_ref:
     output:
         RSEMPREPREF + PREF + ".seq"
     params:
-        gtfFile = GTF_FILE,
         rsemRef = RSEMPREPREF,
         t = THREADS,
-        pref = PREF
+        pref = PREF,
+        gtf_gff = GTF_GFF,
     singularity:
-        "docker://quay.io/biocontainers/rsem"
+        "docker://dceoy/rsem"
     shell:"""
         cd {params.rsemRef}
-        rsem-prepare-reference --gtf {params.gtfFile} \
-        -p {params.t} --star --star-path /opt/conda/envs/snakemake/bin/ \
+        rsem-prepare-reference {params.gtf_gff} {input.gtfFile} \
+        -p {params.t} --star --star-path /usr/local/bin/ \
         {input.refGenome} {params.pref}
     """
+
+  #  rsem-prepare-reference --gff3 /home/buckcenter.org/nmurad/antsrnaseq/Hsaltator/GCF_003227715.1_Hsal_v8.5_genomic.gff \
+  #  --star --star-path /usr/local/bin/ -p 20 /home/buckcenter.org/nmurad/antsrnaseq/Hsaltator/GCF_003227715.1_Hsal_v8.5_genomic.fa \
+  #  hsaltator_ref

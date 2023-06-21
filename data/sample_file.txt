@@ -1,0 +1,8 @@
+A       P.punctata_dominant_gaster_SAMN16583295
+A       P.punctata_dominant_gaster_SAMN16583301
+B       P.punctata_subordinate_gaster_SAMN16583289
+B       P.punctata_subordinate_gaster_SAMN16583303
+A       P.punctata_dominant_gaster_SAMN16583297
+A       P.punctata_dominant_gaster_SAMN16583305
+B       P.punctata_subordinate_gaster_SAMN16583299
+B       P.punctata_subordinate_gaster_SAMN16583307

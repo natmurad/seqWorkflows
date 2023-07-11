@@ -17,7 +17,7 @@ rule trinity_assembly:
         right = lambda wildcards: ",".join(expand("{trim_dir}{sample}{lane}_2_trimmed.fq.gz", trim_dir = TRIMMEDDIR,
                     sample = SAMPLES, lane = LANE)),
         t = THREADS,
-        out = ASSEMBLYDIR,
+        out = OUT_STEP_ASSEMBLY,
         mem = '50G',
         seqType = 'fq'
     singularity:

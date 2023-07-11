@@ -16,7 +16,7 @@ contrasts: "A_vs_B"
 ########################        STEP NAMES         ###############################
 ##################################################################################
 step_qC: qC/ # quality control
-step_assembly: assembly_trinity/ # assembly
+step_assembly: assembly_trinity/trinity/ # assembly
 step_map: map/ # align to assembly 
 step_counts: counts/ # counts
 step_transdecoder: transdecoder/

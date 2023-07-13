@@ -109,11 +109,13 @@ rule all:
      #   assemblyfiltexp = ASSEMBLYDIR + "Trinity.filt.fasta",
 
 
-    ###------ GO ANALYSIS ------###
-        factorLabel = INPUTDIR + "diff_exp/DESeq2_gene/factor_labeling.txt",
+     ###------ GO ANALYSIS ------###
+      #  factorLabel = INPUTDIR + "diff_exp/DESeq2_gene/factor_labeling.txt",
+        factorLabel = expand("{dir}diff_exp/DESeq2_gene/factor_labeling{contrasts}.txt", dir = INPUTDIR, contrasts=CONTRAST),
         seqLens = INPUTDIR + "diff_exp/Trinity.fasta.seq_lens",
         gene_lengths = INPUTDIR + "Trinity.gene_lengths.txt",
-        go_res = INPUTDIR + "diff_exp/DESeq2_gene/A_B.GOseq.enriched"
+     #   go_res = expand("{dir}diff_exp/DESeq2_gene/go/{go}.GOseq.enriched", dir = INPUTDIR, go = [c.replace("_vs_", "_") for c in CONTRAST]),
+        outputlog =  expand("{dir}diff_exp/DESeq2_gene/go/{contrasts}/{contrasts}GODONE.txt", dir = INPUTDIR, contrasts=CONTRAST)
 
 
 #>>>>>>>>>>>>>>------           QUALITY CONTROL        --------<<<<<<<<<<<<<<<<
@@ -255,6 +257,11 @@ include:	"rules/BOTH/trinotate_extract_GO.smk"
 #####################             FACTOR LEN           ########################
 ###############################################################################
 include:	"rules/BOTH/factor_len.smk"
+
+###############################################################################
+#####################             GENE LEN             ########################
+###############################################################################
+include:	"rules/BOTH/trinity_gene_len.smk"
 
 ###############################################################################
 #####################             RUN GOSEQ            ########################

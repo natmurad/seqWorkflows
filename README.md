@@ -45,7 +45,9 @@
 
 :ballot_box_with_check: Edit the config file path (1st line) on the file of the chosen pipeline
 
-:ballot_box_with_check: Folder with the fastq files or the SRAList, the contrast and sample files
+:ballot_box_with_check: Folder with the fastq files or the Sra Acc List
+
+:ballot_box_with_check: Contrast and sample files *(de novo assembly only)*
 
 ## Download public data using SRA-tools
 

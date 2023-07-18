@@ -39,13 +39,16 @@
 
 :ballot_box_with_check: You have snakemake and singularity installed and running
 
+:ballot_box_with_check: You have the folder with the fastq files or the Sra Acc List
+
+:ballot_box_with_check: You have the Contrast and sample files *(only if using de novo assembly)*
+
 :ballot_box_with_check: Clone this repository on your computer
 
 :ballot_box_with_check: Edit config file with your pathways
 
 :ballot_box_with_check: Edit the config file path (1st line) on the file of the chosen pipeline
 
-:ballot_box_with_check: Folder with the fastq files or the SRAList, the contrast and sample files
 
 ## Download public data using SRA-tools
 

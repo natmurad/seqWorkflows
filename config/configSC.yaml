@@ -1,21 +1,35 @@
 ##################################################################################
 ########################          SAMPLES          ###############################
 ##################################################################################
+#[Sample Name]_S1_L00[Lane Number]_[Read Type]_001.fastq.gz
+#{sample}_S1{lane}{read}_001{fq}
 
-samples: "sample1 sample2 sample3
-sample4 sample5 sample6"
+samples: "SRR12330954 SRR12330955 SRR12330956 SRR12330957 SRR12330958
+SRR12330959 SRR12330960 SRR12330961 SRR12330962 SRR12330963 SRR12330964 SRR12330965"
 
-lane: "L001"
+lane: "_L001"
 
 reads: "_1 _2"
+readssc: "_R1 _R2"
 
-fastq: ".fastq.gz"
+fq: ".fastq.gz"
 
 ## Step names
 step_qReports: qReports # quality reports
 
 # Threads
-threads: "50"
+threads: "20"
+
+##################################################################################
+########################        DIRECTORIES        ###############################
+##################################################################################
+
+# Base data dir
+base_dir: /home/user/humanOocyteAging/
+
+# Change to location of all raw .sam files
+raw_data_dir: /home/user/humanOocyteAging/
+
 
 ##################################################################################
 ########################     CELLRANGER PARAMS     ###############################
@@ -23,19 +37,13 @@ threads: "50"
 # Cellranger Ref Index dir
 crindexdir: /home/user/cellranger_ref/
 
-# Data dir
-raw_data_dir: /home/user/rnaseq/specie/
+step_cellrangerMap: cellranger_Counts/ # map to reference
 
-step_cellrangerMap: cellRangerMap/ # map to reference
+#cellranger_refsite: https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-mm10-2020-A.tar.gz # mouse
+cellranger_refsite: https://support.10xgenomics.com/single-cell-gene-expression/software/release-notes/build#GRCh38_2020A # human
 
-# MOUSE
-#cellranger_refsite: https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-mm10-2020-A.tar.gz
+#refname: refdata-gex-mm10-2020-A # mouse
+refname: refdata-gex-GRCh38-2020-A # human
 
-# HUMAN
-cellranger_refsite: https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz
 
-# MOUSE
-#refname: refdata-gex-mm10-2020-A
 
-# HUMAN
-refname: refdata-gex-GRCh38-2020-A

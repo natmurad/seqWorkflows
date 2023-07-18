@@ -3,16 +3,19 @@
 ###############################################################################
 
 rule prefetch:
-    input:
-        sralist =  INPUTDIR + "SraAccList.txt",
     output:
         srafile = INPUTDIR + "{samples}.sra"
     params:
+        sramid = INPUTDIR + "{samples}/{samples}.sra",
+        folder = INPUTDIR + "{samples}/",
+        sra =  "{samples}",
         out_dir = INPUTDIR
     singularity:
-        "docker://ncbi/sra-tools"
+        "docker://pegi3s/sratoolkit"
     message: "\n\n######------ DOWNLOADING RAW SEQUENCE DATA FROM SRA ------######\n"
     shell:"""
         prefetch \
-        -O {params.out_dir} --gzip  {input.sralist}
+        -O {params.out_dir} {params.sra} &&
+        mv {params.sramid} {output.srafile} &&
+        rm -rf 
         """

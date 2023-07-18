@@ -2,7 +2,7 @@
 ##########################          CONFIG          ###########################
 ###############################################################################
 
-configfile: "/home/seqWorkflows/config/configSC.yaml"
+configfile: "/home/user/seqWorkflows/config/configSC.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -25,7 +25,8 @@ STEP_CELLRANGERMAP = config["step_cellrangerMap"] # Cellranger indexing and mapp
 SAMPLES = config["samples"].split() # sample files
 LANE = config["lane"].split() # lane number
 READS = config["reads"].split()
-FQ = config["fastq"].split()
+READSSC = config["readssc"].split()
+FQ = config["fq"].split()
 
 INPUTDIR = config["raw_data_dir"] # /home/user/
 CELLRANGERINDEXDIR = config['crindexdir']
@@ -41,8 +42,9 @@ OUT_STEP_CELLRANGERMAP = os.path.join(INPUTDIR, STEP_CELLRANGERMAP) # /home/data
 rule all:
     input:
         srafile = expand("{outdir}{samples}.sra", outdir = INPUTDIR, samples = SAMPLES),
-        fastq =  expand("{outdir}{sample}_S1_{lane}{reads}_001{fq}", outdir = INPUTDIR, sample = SAMPLES, lane = LANE, reads = READS, fq = FQ),
-#        index = CELLRANGERINDEXDIR + REFNAME + ".tar.gz",
+#        fastq =  expand("{outdir}{samples}{reads}{fq}", outdir = INPUTDIR, samples = SAMPLES, reads = READS, fq = FQ),
+        fastqSC =  expand("{outdir}{samples}_S1{lane}{readsSC}_001{fq}", outdir = INPUTDIR, samples = SAMPLES, lane = LANE, readsSC = READSSC, fq = FQ),
+        index = CELLRANGERINDEXDIR + REFNAME + ".tar.gz",
         indexdir = CELLRANGERINDEXDIR + REFNAME,
         mtx = expand("{outdir}run_{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz", zip, outdir = OUT_STEP_CELLRANGERMAP,
                      sample = SAMPLES, lane = LANE),
@@ -50,8 +52,8 @@ rule all:
                      sample = SAMPLES, lane = LANE),
         features = expand("{outdir}run_{sample}/outs/filtered_feature_bc_matrix/features.tsv.gz", zip, outdir = OUT_STEP_CELLRANGERMAP,
                      sample = SAMPLES, lane = LANE),
-        log = expand("{outdir1}run_{sample}/{sample}_S1_{lane}{reads}_001{fq}.log", outdir1 = OUT_STEP_CELLRANGERMAP,
-                     sample = SAMPLES, lane = LANE, reads = READS, fq = FQ)
+ #       log = expand("{outdir1}run_{sample}/{sample}_S1_{lane}{reads}_001{fq}.log", outdir1 = OUT_STEP_CELLRANGERMAP,
+ #                    sample = SAMPLES, lane = LANE, reads = READS, fq = FQ)
 
 ###############################################################################
 ###########################          RULES          ###########################
@@ -66,6 +68,11 @@ include:	"rules/SRA/prefetch.smk"
 ###########################         FASTQ DUMP      ###########################
 ###############################################################################
 include:	"rules/SINGLECELL/fastqdump.smk"
+
+###############################################################################
+######################           RENAME FASTQ          ########################
+###############################################################################
+include:	"rules/SINGLECELL/rename_fq.smk"
 
 ###############################################################################
 ###########################      DOWNLOAD INDEX     ###########################

@@ -2,16 +2,16 @@
 ######################           DUMP DATA             ########################
 ###############################################################################
 
-rule prefetch:
+rule fastqdump:
     input:
-        sralist =  INPUTDIR + "SRAList.txt",
+        sra =  INPUTDIR + "{samples}.sra",
     output:
-        fastq = INPUTDIR + "/{samples}" + FQ
+        fastq = INPUTDIR + "{samples}" + FQ
     params:
         out_dir = INPUTDIR
     singularity:
-        "docker://ncbi/sra-tools"
+        "docker://pegi3s/sratoolkit"
     shell:"""
         fastq-dump  \
-        -O {params.out_dir} --gzip  {input.sralist}
+        -O {params.out_dir} --gzip  {input.sra}
         """

@@ -18,10 +18,10 @@ rule counts:
         sample = "{sample}",
         out = OUT_STEP_CELLRANGERMAP,
     output:
-        mtx = OUT_STEP_CELLRANGERMAP + "run_{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
-        barcode = OUT_STEP_CELLRANGERMAP + "run_{sample}/outs/filtered_feature_bc_matrix/features.tsv.gz",
-        features = OUT_STEP_CELLRANGERMAP + "run_{sample}/outs/filtered_feature_bc_matrix/barcodes.tsv.gz",
- #       log = OUT_STEP_CELLRANGERMAP + "run_{sample}/{sample}_S1_{lane}{reads}_001{fq}.log"
+        mtx = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
+        barcode = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/features.tsv.gz",
+        features = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/barcodes.tsv.gz",
+ #       log = OUT_STEP_CELLRANGERMAP + "{sample}/{sample}_S1_{lane}{reads}_001{fq}.log"
     singularity:
         "docker://litd/docker-cellranger"
     shell:'''

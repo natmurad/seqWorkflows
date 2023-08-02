@@ -1,7 +1,7 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configDenovoPE.yaml"
+configfile: "/home/user/seqWorkflows/config/configDenovoPE.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
@@ -37,6 +37,8 @@ TRIMMEDDIR =  config['trimmed_dir'] # os.path.join(DIR, "/trimmed/")
 ASSEMBLYDIR = config['assembly_dir']
 ASSEMBLY = config['assembly_name']
 #BTINDEX = config['btIndex_dir']
+
+CONTRAST = config['contrasts'].split()
 
 OUT_STEP_QC = os.path.join(INPUTDIR, STEP_QC) # /home/dataset/qC
 OUT_STEP_ASSEMBLY = os.path.join(INPUTDIR, STEP_ASSEMBLY) # /home/dataset/map
@@ -83,7 +85,7 @@ rule all:
     ###------ ANNOTATION ------###
     # transDecoder
         long_orfs = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
-        pep = OUT_STEP_TRANSDECODER + "trinity.Trinity.fasta.transdecoder.pep",
+        pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
     # uniprot
         uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
         blastdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb",
@@ -97,16 +99,17 @@ rule all:
     # signal p
         signalp = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt",
     # trinotate
-      #  sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
-     #   xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
-     #   xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
-    #   go = OUT_STEP_ANNOTATION + "go_annotations.txt",
+        sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
+        xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
+        xlsReport2 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv2.xls",
+        go = OUT_STEP_ANNOTATION + "go_annotations.txt",
 
 
     ###------ DIFFERENTIAL EXPRESSION ------###
         counts = expand("{out_dir}{sample}{lane}/RSEM.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
         mtx =  OUT_STEP_COUNTS + "RSEM.isoform.counts.matrix",
-     #   assemblyfiltexp = ASSEMBLYDIR + "Trinity.filt.fasta",
+        de = expand("{dir}diff_exp/DESeq2_gene/RSEM.gene.counts.matrix.{contrasts}.DESeq2.DE_results", dir=INPUTDIR, contrasts=CONTRAST),
+        de_mtx = expand("{dir}diff_exp/DESeq2_gene/RSEM.gene.counts.matrix.{contrasts}.DESeq2.count_matrix", dir=INPUTDIR, contrasts=CONTRAST),
 
 
      ###------ GO ANALYSIS ------###

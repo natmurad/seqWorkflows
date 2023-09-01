@@ -1,4 +1,4 @@
-# :dna: Workflows for analysis of sequencing data [![DOI](https://zenodo.org/badge/617594074.svg)](https://zenodo.org/badge/latestdoi/617594074)
+# :dna: Workflows for preprocessing sequencing data [![DOI](https://zenodo.org/badge/617594074.svg)](https://zenodo.org/badge/latestdoi/617594074)
 
 
 > **Warning**

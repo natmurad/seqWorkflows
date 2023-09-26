@@ -21,7 +21,3 @@ rule prepare_ref:
         -p {params.t} --star --star-path /usr/local/bin/ \
         {input.refGenome} {params.pref}
     """
-
-  #  rsem-prepare-reference --gff3 /home/buckcenter.org/nmurad/antsrnaseq/Hsaltator/GCF_003227715.1_Hsal_v8.5_genomic.gff \
-  #  --star --star-path /usr/local/bin/ -p 20 /home/buckcenter.org/nmurad/antsrnaseq/Hsaltator/GCF_003227715.1_Hsal_v8.5_genomic.fa \
-  #  hsaltator_ref

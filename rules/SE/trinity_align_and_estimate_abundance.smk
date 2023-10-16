@@ -24,10 +24,3 @@ rule align_and_estimate_abundance:
             --prep_reference --trinity_mode \
             --output_dir {params.out_dir}
     """
-
-#/usr/local/bin/util/align_and_estimate_abundance.pl --transcripts /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/assembly_trinity/Trinity.fasta \
-#            --seqType fq \
-#            --single /home/buckcenter.org/nmurad/antsrnaseq/Tnylanderi/trimmed/Tnyladeri_queen_abdomen_SAMN16591861_trimmed.fq.gz \
-#            --est_method RSEM --aln_method bowtie2 \
-#            --prep_reference --trinity_mode \
-#            --output_dir ~/antsrnaseq/Tnylanderi/counts

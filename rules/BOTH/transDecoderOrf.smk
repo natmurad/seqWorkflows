@@ -18,15 +18,3 @@ rule transcoder_orf:
         """
 
 
-
-
-
-
-## identify long orfs
-#$TRANSDECODER_HOME/TransDecoder.LongOrfs -t ../trinity_out_dir/Trinity.fasta
-
-# Now, run the step that predicts which ORFs are likely to be coding.
-#$TRANSDECODER_HOME/TransDecoder.Predict -t ../trinity_out_dir/Trinity.fasta 
-
-#output less Trinity.fasta.transdecoder.pep -> contains the protein sequences corresponding to the predicted coding regions within the transcripts.
-

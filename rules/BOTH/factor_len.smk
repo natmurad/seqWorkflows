@@ -6,8 +6,6 @@ rule factor_len:
     input:
         rsemMtx = INPUTDIR + "diff_exp/DESeq2_gene/RSEM.gene.counts.matrix.{contrasts}.DESeq2.DE_results",
 #    params:
-#        out_dir = INPUTDIR + "diff_exp/",
-#        command = """ "\\t" "\$11 < 0.05 {{new_var=\$2"_"\$3; printf (new_var"\\t"\$1"\\n")}}" """
     message: "\n\n######------ FACTOR LEN ------######\n"
     output:
         factorLabel = INPUTDIR + "diff_exp/DESeq2_gene/factor_labeling{contrasts}.txt",

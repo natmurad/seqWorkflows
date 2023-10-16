@@ -13,7 +13,6 @@ rule run_GOseq:
         go_dir = INPUTDIR + "diff_exp/DESeq2_gene/go/{contrasts}",
     message: "\n\n######------ RUNNING GO ANALYSIS ------######\n"
     output:
-      #  go_res = INPUTDIR + "diff_exp/DESeq2_gene/go/{go}.GOseq.enriched",
         log = INPUTDIR + "diff_exp/DESeq2_gene/go/{contrasts}/{contrasts}GODONE.txt"
     singularity:
         "docker://trinityrnaseq/trinityrnaseq"
@@ -26,9 +25,3 @@ rule run_GOseq:
                        --background {input.rsemMtx} &&
             echo "GO DONE" > {output.log}
     """
-     #      cd {params.out_dir} &&
-      #      /usr/local/bin/util/misc/fasta_seq_length.pl  {input.assembly} > {output.seqLens} &&
-       #     /usr/local/bin/util/misc/TPM_weighted_gene_length.py  \
-       #         --gene_trans_map {input.gene_trans_map} \
-       #         --trans_lengths {output.seqLens} \
-       #         --TPM_matrix {input.tmm} > {output.gene_lengths} &&

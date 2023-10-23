@@ -1,12 +1,10 @@
 ##################################################################################
 ########################          SAMPLES          ###############################
 ##################################################################################
-samples: "sample1 sample2 sample3
-sample4 sample5 sample6"
+samples: "sample1 sample2 sample3 sample4"
 
 lane: ""
-
-reads: "1 2"
+reads: "R" # or empty
 
 fq: ".fastq.gz"
 
@@ -24,26 +22,25 @@ step_counts: counts/ # counts
 adapters: "TruSeq3-PE-2.fa"
 
 # threads
-threads: 50
+threads: 10
 
 ## Directories
 # Base data dir
-base_dir: /home/user/
+base_dir: /home/user/data/
 
 # Change to location of all raw .sam files
-raw_data_dir: /home/user/rnaseq/specie/
+raw_data_dir: /home/user/data/
 
 # Path to trimmed reads output
-trimmed_dir: /home/user/rnaseq/specie/trimmed/
+trimmed_dir: /home/user/data/trimmed/
 
 # Path to reference genome
-ref_genome: /home/genome/Mus_musculus.GRCm39.dna.toplevel.fa
+ref_genome: ref_genome: /home/genome/Mus_musculus.GRCm39.dna.toplevel.fa
 
 # Path to gtf file
 gtf_file: /home/genome/Mus_musculus.GRCm39.105.gtf
 gtf_gff: "--gtf"
 #gtf_gff: "--gff3"
-
 
 # Rsem prepare ref dir
 rsemprepref: /home/genome/mouse/rsemRef/

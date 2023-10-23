@@ -5,7 +5,6 @@
 rule fastqcRAW:
     input:
 #     "/path/to/fastq.gz/sample.fastq.gz"
-#       raw = INPUTDIR + "{sample}" + LANE + ".fastq.gz"
        raw = INPUTDIR + "{sample}" + LANE + FQ
     output:
        html_report = OUT_STEP_QC + "fastqcRaw/{sample}" + LANE + "_fastqc.html",

@@ -3,29 +3,24 @@
 ###############################################################################
 rule map:
     input:
-        read1 = TRIMMEDDIR + "{sample}{lane}" + "_1_trimmed.fq.gz",
-        read2 = TRIMMEDDIR + "{sample}{lane}" + "_2_trimmed.fq.gz",
-        refdir = STARINDEXDIR
+        read1 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}1_trimmed.fq.gz",
+        read2 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}2_trimmed.fq.gz",
+        ref = RSEMPREPREF + PREF + ".seq"
     output:
-        align = OUT_STEP_MAP + "{sample}{lane}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
-        talign = OUT_STEP_MAP + "{sample}{lane}Aligned.toTranscriptome.out.bam"
+        align = OUT_STEP_MAP + "{sample}{lane}_{reads}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
     message: "\n\n######------ MAPPING READS WITH STAR - SAMPLE = {wildcards.sample} ------######\n"
     params:
         t = THREADS,
-        outPref =  OUT_STEP_MAP + "{sample}{lane}"
+        outPref =  OUT_STEP_MAP + "{sample}{lane}_{reads}",
+        refdir = STARINDEXDIR
     singularity:
         "docker://dceoy/star"
     shell:"""
+        ulimit -n 10000
         rm -rf {params.outPref}
         mkdir -p {params.outPref}
-        STAR --genomeDir {input.refdir} \
+        STAR --genomeDir {params.refdir} \
         --readFilesIn {input.read1} {input.read2} \
         --runThreadN {params.t} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate \
         --quantMode TranscriptomeSAM GeneCounts --outFileNamePrefix {params.outPref} 
   """
-  #    --outFilterScoreMinOverLread 0.3 --outFilterMatchNminOverLread 0.3
-
-  #STAR --runThreadN 3 --genomeDir $index \
-  #  --readFilesIn $fq1 $fq2 --outSAMtype BAM   SortedByCoordinate \
-  #  --outTmpDir /scratch/oknjav001/sarsCovRNA/tempalign --quantMode GeneCounts
-  #  --readFilesCommand zcat --outFileNamePrefix $base"_"

@@ -4,18 +4,18 @@
 
 rule prefetch:
     output:
-        srafile = INPUTDIR + "{samples}.sra"
+        srafile = INPUTDIR + "{sample}.sra"
     params:
-        sramid = INPUTDIR + "{samples}/{samples}.sra",
-        folder = INPUTDIR + "{samples}/",
-        sra =  "{samples}",
+        sramid = INPUTDIR + "{sample}/{sample}.sra",
+        folder = INPUTDIR + "{sample}/",
+        sra =  "{sample}",
         out_dir = INPUTDIR
     singularity:
         "docker://pegi3s/sratoolkit"
     message: "\n\n######------ DOWNLOADING RAW SEQUENCE DATA FROM SRA ------######\n"
     shell:"""
         prefetch \
-        -O {params.out_dir} {params.sra} &&
+        -O {params.out_dir} {params.sra}  --max-size 50g &&
         mv {params.sramid} {output.srafile} &&
-        rm -rf 
+        rm -rf {params.folder}
         """

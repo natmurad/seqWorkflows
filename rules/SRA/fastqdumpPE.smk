@@ -2,18 +2,17 @@
 ######################           DUMP DATA             ########################
 ###############################################################################
 
-rule fastqdump:
+rule fastqdumpPE:
     input:
         sra =  INPUTDIR + "{samples}.sra",
     output:
-        fastq = INPUTDIR + "{samples}" + FQ
+        fastq1 = INPUTDIR + "{samples}_1{fq}",
+        fastq2 = INPUTDIR + "{samples}_2{fq}",
     params:
         out_dir = INPUTDIR
-    
     singularity:
         "docker://pegi3s/sratoolkit"
-    message: "\n\n######------ FASTQ-DUMP - SAMPLE = {wildcards.sample} ------######\n"
     shell:"""
-        fastq-dump  \
+        fastq-dump --split-3 --skip-technical \
         -O {params.out_dir} --gzip  {input.sra}
         """

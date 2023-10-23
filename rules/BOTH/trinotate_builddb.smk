@@ -8,11 +8,9 @@ rule build_db:
         pep = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
         outfmt6 = OUT_STEP_ANNOTATION + "uniprot.blastx.outfmt6",
     output:
-       # trinotatesqlite = OUT_STEP_DOWNLOAD + "Trinotate.sqlite",
         trinotatesqlite_cp = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
     params:
         db = OUT_STEP_ANNOTATION + "Trinotate",
-       # dir = OUT_STEP_DOWNLOAD
     message: "\n\n######------ DOWNLOAD TRINOTATE SQLITE DB ------######\n"
     singularity:
         "docker://trinityrnaseq/trinotate"

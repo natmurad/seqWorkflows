@@ -21,11 +21,3 @@ rule trinity_guided_assembly:
             --CPU {params.t} \
             --output {params.out}
         """
-
-
-#$ /path/to/Trinity/util/genome_guided_trinity.sh \
-#  --genome_guided_bam {input.bamList} \
-#  --genome_guided_max_intron 10000 \
-##  --max_memory {params.mem} \
- # --CPU {params.t} \
- # --output {params.out}

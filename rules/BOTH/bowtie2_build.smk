@@ -2,10 +2,6 @@
 ######################          BOWTIE INDEX           ########################
 ###############################################################################
 
-#bowtie2-build GCF_000299455.fna ecoli
-
-#% bowtie2-build Trinity.fasta Trinity.fasta
-
 rule bowtie2_build:
     input:
         assembly = ASSEMBLYDIR + ASSEMBLY

@@ -1,20 +1,20 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configPreprocessSE.yaml"
+configfile: "/home/user/seqWorkflows/config/configPreprocess.yaml"
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
-import io 
 import os
 import shutil
-import pandas as pd
-import pathlib
 import time
-from snakemake.exceptions import print_exception, WorkflowError
 
 start = time.time()
+
+wildcard_constraints:
+    lane=".*",
+    reads=".*"
 
 ###############################################################################
 ######################          SET VARIABLES          ########################
@@ -26,15 +26,16 @@ STEP_MAP = config["step_map"] # indexing and mapping
 STEP_COUNTS = config["step_counts"] # quantify counts
 
 SAMPLES = config["samples"].split() # sample files
+#SRALIST = config["sralist"]
 LANE = config["lane"]
+NUM = config["reads"].split()
 FQ = config["fq"]
-
+READS = config["reads"].split()
 ADAPTERS = config["adapters"] # adapters sequences
 REF_GENOME = config["ref_genome"]
-GTF_GFF = config["gtf_gff"]
 GTF_FILE = config["gtf_file"]
+GTF_GFF = config["gtf_gff"]
 PREF = config["prefix_ref"]
-READS = ""
 
 INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
@@ -51,26 +52,32 @@ OUT_STEP_COUNTS = os.path.join(DIR, STEP_COUNTS) # /home/dataset/counts
 ###############################################################################
 rule all:
     input:
+    ###------ QUALITY CONTROL ------###
 #     fastqc output before trimming
         fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        fastq_zip = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
     # fastqc output after trimming
         trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
         html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        zip_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
    # merged reports before trimming
         raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
     # merged reports after trimming
         trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+    ###------ PREPARE REFERENCE ------###
     # reference for alignments
         rsemref = RSEMPREPREF + PREF + ".seq",
+    ###------ MAP TO THE REFERENCE ------###
     # star align
-        reads_map = expand("{out_dir}{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
+        reads_map = expand("{out_dir}{sample}{lane}Aligned.toTranscriptome.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
+    ###------ COUNT MATRIX ------###
     # rsem
         counts = expand("{out_dir}{sample}{lane}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE),
 
 
+###############################################################################
+###########################          RULES          ###########################
+###############################################################################
 
+#>>>>>>>>>>>>>>------           QUALITY CONTROL        --------<<<<<<<<<<<<<<<<
 ###############################################################################
 #################          QUALITY REPORT RAW DATA          ###################
 ###############################################################################
@@ -89,8 +96,9 @@ include:	"rules/SE/fastqcTRIM.smk"
 ###############################################################################
 ######################          MERGE REPORTS          ########################
 ###############################################################################
-include:	"rules/BOTH/multiqc.smk"
+include:	"rules/SE/multiqc.smk"
 
+#>>>>>>>>>>>>>>------          MAPPING TO REFERENCE    --------<<<<<<<<<<<<<<<<
 ###############################################################################
 ###################        RSEM PREPARE REFERENCE        ######################
 ###############################################################################
@@ -101,6 +109,7 @@ include:	"rules/BOTH/rsemref.smk"
 ###############################################################################
 include:	"rules/SE/starmap.smk"
 
+#>>>>>>>>>>>>>>------           COUNT MATRIX           --------<<<<<<<<<<<<<<<<
 ###############################################################################
 ######################          RSEM COUNTS            ########################
 ###############################################################################

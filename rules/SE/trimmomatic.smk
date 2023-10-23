@@ -4,9 +4,9 @@
 
 rule trimSE:
     input:
-        raw = INPUTDIR + "{sample}" + LANE + FQ,
+        raw = INPUTDIR + "{sample}{lane}" + FQ,
     output:
-        trimmed = TRIMMEDDIR + "{sample}" + LANE + "_trimmed.fq.gz"
+        trimmed = TRIMMEDDIR + "{sample}{lane}" + "_trimmed.fq.gz"
     params:
         t = THREADS,
         adapters = ADAPTERS

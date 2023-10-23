@@ -1,44 +1,49 @@
-## Samples
-samples: "sample1 sample2 sample3
-sample4 sample5 sample6"
+##################################################################################
+########################          SAMPLES          ###############################
+##################################################################################
+samples: "sample1 sample2 sample3"
 
-lane: ""
+lane: "_L005_R1_001"
+
+reads: ""
 
 fq: ".fastq.gz"
 
-## Step names
+##################################################################################
+########################        STEP NAMES         ###############################
+##################################################################################
 step_qC: qC/ # quality control
 step_map: map/ # map to reference
 step_counts: counts/ # counts
 
-## Info
+##################################################################################
+###########################        INFO        ###################################
+##################################################################################
 # adapters
-adapters: "TruSeq3-SE-2.fa"
+adapters: "TruSeq3-SE.fa"
 # threads
-threads: 50
+threads: 10
 
 ## Directories
 # Base data dir
-base_dir: /home/user/
+base_dir: /home/user/data/
 
 # Change to location of all raw .sam files
-raw_data_dir: /home/user/rnaseq/specie/
+raw_data_dir: /home/user/data/
 
 # Path to trimmed reads output
-trimmed_dir: /home/user/rnaseq/specie/trimmed/
+trimmed_dir: /home/user/data/trimmed/
 
 # Path to reference genome
-ref_genome: /home/user/rnaseq/specie/reference_from_ensembl.fa
+ref_genome: /home/user/genome/Mus_musculus.GRCm39.dna.toplevel.fa
 
 # Path to gtf file
-gtf_file: /home/user/rnaseq/specie/annotation_file_from_ensembl.gff
-gtf_gff: "--gff3"
-#gtf_gff: "--gtf"
-# Genome index dir
-#genomeindexdir: /home/antsRNAseq/M. pharaonis/starIndex/
+gtf_file: /home/user/genome/Mus_musculus.GRCm39.110.gtf
+gtf_gff: "--gtf"
+#gtf_gff: "--gff3"
 
 # Rsem prepare ref dir
-rsemprepref: /home/user/rnaseq/specie/rsemRef/
+rsemprepref: /home/user/genome/Mouse/rsemRef/
 
 # Reference prefix
-prefix_ref: "specie_ref"
+prefix_ref: "mouse_ref"

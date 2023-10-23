@@ -3,13 +3,13 @@
 ###############################################################################
 rule trimPE:
     input:
-        read1 = INPUTDIR + "{sample}{lane}" + "_1" + FQ,
-        read2 = INPUTDIR + "{sample}{lane}" + "_2" + FQ,
+        read1 = INPUTDIR + "{sample}{lane}" + "_{reads}1" + FQ,
+        read2 = INPUTDIR + "{sample}{lane}" + "_{reads}2" + FQ,
     output:
-        trimmed1 = TRIMMEDDIR + "{sample}{lane}" + "_1_trimmed.fq.gz",
-        un1 = TRIMMEDDIR + "{sample}{lane}" + "_1_UN_trimmed.fq.gz",
-        trimmed2 = TRIMMEDDIR + "{sample}{lane}" + "_2_trimmed.fq.gz",
-        un2 = TRIMMEDDIR + "{sample}{lane}" + "_2_UN_trimmed.fq.gz"
+        trimmed1 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}1_trimmed.fq.gz",
+        un1 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}1_UN_trimmed.fq.gz",
+        trimmed2 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}2_trimmed.fq.gz",
+        un2 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}2_UN_trimmed.fq.gz"
     message: "\n\n######------ TRIMMING READS FOR SAMPLE = {wildcards.sample} ------######\n"
     params:
         t = THREADS,

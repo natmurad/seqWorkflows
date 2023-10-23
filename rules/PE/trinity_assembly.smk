@@ -20,6 +20,7 @@ rule trinity_assembly:
         out = OUT_STEP_ASSEMBLY,
         mem = '50G',
         seqType = 'fq'
+        message: "\n\n######------ ASSEMBLY WITH TRINITY ------######\n"
     singularity:
         "docker://trinityrnaseq/trinityrnaseq"
     shell:"""

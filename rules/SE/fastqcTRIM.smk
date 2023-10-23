@@ -5,10 +5,10 @@
 rule fastqcTRIM:
     input:
 #     "/path/to/fastq.gz/trimmed/sample.fastq.gz"
-       TRIMMEDDIR + "{sample}" + LANE + "_trimmed.fq.gz"
+       TRIMMEDDIR + "{sample}{lane}" + "_trimmed.fq.gz"
     output:
-        html_report = OUT_STEP_QC + "fastqcTrim/{sample}" + LANE + "_trimmed_fastqc.html",
-        zip_report = OUT_STEP_QC + "fastqcTrim/{sample}" + LANE + "_trimmed_fastqc.zip"
+        html_report = OUT_STEP_QC + "fastqcTrim/{sample}{lane}" + "_trimmed_fastqc.html",
+        zip_report = OUT_STEP_QC + "fastqcTrim/{sample}{lane}"  + "_trimmed_fastqc.zip"
     params:
         out = OUT_STEP_QC + "fastqcTrim/"
     singularity:

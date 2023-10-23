@@ -16,4 +16,3 @@ rule transcoder_orf:
     shell:"""
         TransDecoder.LongOrfs -t {input.assembly} -O {params.out}
         """
-

@@ -69,10 +69,10 @@ rule all:
         rsemref = RSEMPREPREF + PREF + ".seq",
     ###------ MAPPING ------###
     # star align
-        reads_map = expand("{out_dir}{sample}{lane}_{reads}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE, reads=READS),
+        reads_map = expand("{out_dir}{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE, reads=READS),
     ###------ COUNT MATRIX ------###
     # rsem
-        counts = expand("{out_dir}{sample}{lane}_{reads}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE, reads=READS),
+        counts = expand("{out_dir}{sample}{lane}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE, reads=READS),
 
 
 

@@ -7,7 +7,8 @@ rule map:
         read2 = TRIMMEDDIR + "{sample}{lane}" + "_{reads}2_trimmed.fq.gz",
         ref = RSEMPREPREF + PREF + ".seq"
     output:
-        align = OUT_STEP_MAP + "{sample}{lane}{reads}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
+        align = OUT_STEP_MAP + "{sample}{lane}{reads}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam,
+        bam = OUT_STEP_MAP + "{sample}{lane}{reads}Aligned.toTranscriptome.out.bam",
     message: "\n\n######------ MAPPING READS WITH STAR - SAMPLE = {wildcards.sample} ------######\n"
     params:
         t = THREADS,

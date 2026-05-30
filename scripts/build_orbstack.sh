@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="${1:-seqworkflows:latest}"
+IMAGE="${1:-ghcr.io/natmurad/seqworkflows:1.0.0}"
 PLATFORM="${SEQWORKFLOWS_DOCKER_PLATFORM:-linux/amd64}"
 
 if command -v docker >/dev/null 2>&1; then

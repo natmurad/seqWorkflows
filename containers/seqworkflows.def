@@ -12,7 +12,7 @@ From: mambaorg/micromamba:1.5.8
 %environment
     export PATH=/opt/conda/bin:$PATH
     export LC_ALL=C
-    export SEQWORKFLOWS_CONTAINER=docker://seqworkflows:latest
+    export SEQWORKFLOWS_CONTAINER=docker://ghcr.io/natmurad/seqworkflows:1.0.0
 
 %runscript
     exec "$@"

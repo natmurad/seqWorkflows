@@ -1,5 +1,7 @@
 FROM mambaorg/micromamba:1.5.8
 
+LABEL org.opencontainers.image.source="https://github.com/natmurad/seqWorkflows"
+
 COPY --chown=$MAMBA_USER:$MAMBA_USER env/seqworkflows.yml /tmp/seqworkflows.yml
 COPY --chown=$MAMBA_USER:$MAMBA_USER env/seqworkflows-linux-64.lock.yml /tmp/seqworkflows-linux-64.lock.yml
 
@@ -8,6 +10,6 @@ RUN micromamba install -y -n base -f /tmp/seqworkflows-linux-64.lock.yml \
 
 ENV PATH=/opt/conda/bin:$PATH
 ENV LC_ALL=C
-ENV SEQWORKFLOWS_CONTAINER=docker://seqworkflows:latest
+ENV SEQWORKFLOWS_CONTAINER=docker://ghcr.io/natmurad/seqworkflows:1.0.0
 
 CMD ["/bin/bash"]

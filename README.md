@@ -10,7 +10,7 @@ Choose one execution style:
 
 - Local: Snakemake and all workflow tools installed on your machine.
 - Apptainer: Apptainer plus the `seqworkflows.sif` image.
-- OrbStack/Docker: OrbStack or Docker plus the `seqworkflows:latest` image.
+- OrbStack/Docker: OrbStack or Docker plus the versioned `ghcr.io/natmurad/seqworkflows:1.0.0` image.
 
 ## Quick Start
 
@@ -155,7 +155,10 @@ PARENT_DIR/
 Actual subdirectories depend on the selected mode.
 
 Use a distinct `--rsem-ref-dir` for each genome build and annotation pair. Do
-not reuse an index generated from a different FASTA or GTF/GFF file.
+not reuse an index generated from a different FASTA or GTF/GFF file. The CLI
+stores SHA-256 hashes in `ref/rsemRef/.seqworkflow-reference.json` and stops
+before running Snakemake if a later run tries to reuse the directory with
+incompatible inputs.
 
 ## Containers
 
@@ -202,7 +205,7 @@ Run the workflow inside the image:
 docker run --rm -it \
   -v "$PWD:/work" \
   -w /work \
-  seqworkflows:latest \
+  ghcr.io/natmurad/seqworkflows:1.0.0 \
   bin/seqworkflow preprocessPE R1.fastq.gz R2.fastq.gz results/preprocessPE \
     --ref-genome genome.fa \
     --gtf-file annotation.gtf \
@@ -210,6 +213,9 @@ docker run --rm -it \
 ```
 
 The build script uses `docker` if it is available in `PATH`. If not, it uses OrbStack's bundled Docker CLI at `/Applications/OrbStack.app/Contents/MacOS/xbin/docker`. The image is built as `linux/amd64` because Bioconda has broader package support there than on macOS ARM.
+
+Versioned images are published to GHCR by `.github/workflows/publish-container.yml`
+when a release tag such as `v1.0.0` is pushed.
 
 In OrbStack/Docker mode, Snakemake runs inside the already-started container. In Apptainer mode, Snakemake uses the configured container image for each rule.
 

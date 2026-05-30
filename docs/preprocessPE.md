@@ -147,7 +147,7 @@ OUTDIR/../ref/rsemRef/
 ```
 
 It symlinks the input FASTQs into `OUTDIR/input/` using the naming convention expected by the Snakefile.
-The shared `OUTDIR/../ref/rsemRef/` directory allows later runs to reuse the generated RSEM/STAR index. Use `--rsem-ref-dir` to select a distinct directory when changing the genome FASTA or annotation file.
+The shared `OUTDIR/../ref/rsemRef/` directory allows later runs to reuse the generated RSEM/STAR index. The wrapper records SHA-256 hashes in `.seqworkflow-reference.json` and rejects incompatible FASTA or annotation inputs. Use `--rsem-ref-dir` to select a distinct directory when changing the genome FASTA or annotation file.
 
 For a dry-run:
 
@@ -188,7 +188,7 @@ On macOS with OrbStack:
 ```bash
 scripts/build_orbstack.sh
 
-docker run --rm -it -v "$PWD:/work" -w /work seqworkflows:latest \
+docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/natmurad/seqworkflows:1.0.0 \
   bin/seqworkflow preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR \
     --ref-genome genome.fa \
     --gtf-file annotation.gtf \

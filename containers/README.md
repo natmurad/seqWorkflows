@@ -76,7 +76,7 @@ Run the CLI inside the container:
 docker run --rm -it \
   -v "$PWD:/work" \
   -w /work \
-  seqworkflows:latest \
+  ghcr.io/natmurad/seqworkflows:1.0.0 \
   bin/seqworkflow preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR \
     --ref-genome genome.fa \
     --gtf-file annotation.gtf \
@@ -87,3 +87,9 @@ docker run --rm -it \
 In this mode, Snakemake runs inside the already-started container, so it does not need `--sdm apptainer`.
 
 The Dockerfile and Apptainer definition install from `env/seqworkflows-linux-64.lock.yml`. The shorter `env/seqworkflows.yml` stays as the readable package recipe for updating the environment intentionally.
+
+The default image is versioned as `ghcr.io/natmurad/seqworkflows:1.0.0`.
+Pushing a release tag such as `v1.0.0` triggers
+`.github/workflows/publish-container.yml` and publishes the matching GHCR tag.
+After the first publication, set the package visibility to public in the GitHub
+package settings if anonymous pulls should be allowed.

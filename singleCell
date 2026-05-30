@@ -10,7 +10,7 @@ configfile: CONFIGFILE
 
 SEQWORKFLOWS_CONTAINER = config.get(
     "container",
-    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://ghcr.io/natmurad/seqworkflows:1.0.0"),
 )
 
 ###############################################################################

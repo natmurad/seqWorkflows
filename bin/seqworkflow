@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
+import json
 import os
 import shlex
 import shutil
@@ -15,6 +17,8 @@ except ImportError:
 
 
 REPO_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_CONTAINER = "docker://ghcr.io/natmurad/seqworkflows:1.0.0"
+REFERENCE_MANIFEST = ".seqworkflow-reference.json"
 
 PE_WORKFLOWS = {"preprocessPE", "denovoPE", "qC_PE", "refguidedPE"}
 SE_WORKFLOWS = {"preprocessSE", "denovoSE"}
@@ -84,6 +88,71 @@ def ensure_file(path, label):
     return resolved
 
 
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def reference_identity(args, ref_genome, gtf_file):
+    return {
+        "schema_version": 1,
+        "reference_genome": {
+            "path": str(ref_genome),
+            "sha256": sha256_file(ref_genome),
+        },
+        "annotation": {
+            "path": str(gtf_file),
+            "sha256": sha256_file(gtf_file),
+        },
+        "annotation_type": args.gtf_gff,
+        "prefix": args.prefix_ref,
+    }
+
+
+def comparable_reference_identity(identity):
+    return {
+        "reference_genome_sha256": identity.get("reference_genome", {}).get("sha256"),
+        "annotation_sha256": identity.get("annotation", {}).get("sha256"),
+        "annotation_type": identity.get("annotation_type"),
+        "prefix": identity.get("prefix"),
+    }
+
+
+def validate_reference_dir(args, ref_dir, ref_genome, gtf_file):
+    manifest_path = ref_dir / REFERENCE_MANIFEST
+    expected = reference_identity(args, ref_genome, gtf_file)
+
+    if manifest_path.exists():
+        try:
+            current = json.loads(manifest_path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"Invalid reference manifest: {manifest_path}: {exc}")
+        current_fields = comparable_reference_identity(current)
+        expected_fields = comparable_reference_identity(expected)
+        if current_fields != expected_fields:
+            changed = [key for key in expected_fields if current_fields.get(key) != expected_fields[key]]
+            fields = ", ".join(changed)
+            raise SystemExit(
+                f"Reference directory mismatch: {ref_dir}\n"
+                f"Changed identity fields: {fields}\n"
+                "Use a distinct --rsem-ref-dir for each FASTA and GTF/GFF pair."
+            )
+        return
+
+    if any(ref_dir.iterdir()):
+        raise SystemExit(
+            f"Reference directory is not empty and has no identity manifest: {ref_dir}\n"
+            "Use a new --rsem-ref-dir, or rebuild this index so seqworkflow can validate it."
+        )
+
+    temporary_path = manifest_path.with_suffix(f"{manifest_path.suffix}.{os.getpid()}.tmp")
+    temporary_path.write_text(json.dumps(expected, indent=2, sort_keys=True) + "\n")
+    temporary_path.replace(manifest_path)
+
+
 def snakemake_command(args, snakefile):
     cmd = shlex.split(args.snakemake) + ["-s", str(REPO_DIR / snakefile), "-j", str(args.jobs)]
     if args.dry_run:
@@ -130,6 +199,7 @@ def base_config(args, input_dir, trimmed_dir, suffix):
 def add_reference_config(config, args, ref_dir):
     ref_genome = ensure_file(args.ref_genome, "Reference genome")
     gtf_file = ensure_file(args.gtf_file, "Annotation file")
+    validate_reference_dir(args, ref_dir, ref_genome, gtf_file)
     config.update(
         {
             "step_map": "map/",
@@ -237,7 +307,7 @@ def add_common_options(parser, pe=True, reference=False, denovo=False):
     parser.add_argument("--dry-run", action="store_true", help="Run Snakemake with -n.")
     parser.add_argument("--runtime", choices=("local", "apptainer", "singularity", "conda", "orbstack"), default="local", help="Execution runtime. Default: local.")
     parser.add_argument("--use-containers", choices=("apptainer", "singularity", "conda"), help="Deprecated alias for --runtime.")
-    parser.add_argument("--container-image", default=os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"), help="Container image/SIF used by Snakemake container directives.")
+    parser.add_argument("--container-image", default=os.environ.get("SEQWORKFLOWS_CONTAINER", DEFAULT_CONTAINER), help="Container image/SIF used by Snakemake container directives.")
     parser.add_argument("--snakemake-args", default="", help="Extra quoted arguments passed to Snakemake.")
 
     if reference:
@@ -315,7 +385,7 @@ def build_parser():
                   --runtime apptainer --container-image seqworkflows.sif
 
               OrbStack/Docker:
-                docker run --rm -it -v "$PWD:/work" -w /work seqworkflows:latest \\
+                docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/natmurad/seqworkflows:1.0.0 \\
                   bin/{command_name} preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR \\
                     --ref-genome genome.fa --gtf-file genes.gtf --runtime orbstack
 

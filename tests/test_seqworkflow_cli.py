@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import hashlib
+import json
 import subprocess
 import tempfile
 import unittest
@@ -32,6 +34,10 @@ class SeqworkflowCliTests(unittest.TestCase):
         result = subprocess.run(cmd, cwd=REPO_DIR, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         return result
+
+    def run_cli_raw(self, *args):
+        cmd = [str(SEQWORKFLOW), *map(str, args), "--snakemake", "/usr/bin/true", "--dry-run"]
+        return subprocess.run(cmd, cwd=REPO_DIR, text=True, capture_output=True)
 
     def assert_config_contains(self, outdir, mode, *patterns):
         config = outdir / "config" / f"{mode}.yaml"
@@ -102,6 +108,61 @@ class SeqworkflowCliTests(unittest.TestCase):
             outdir = self.work / name
             self.run_cli("preprocessPE", self.r1, self.r2, outdir, "--ref-genome", self.ref, "--gtf-file", self.gtf)
             self.assert_config_contains(outdir, "preprocessPE", f"rsemprepref: {reference_dir}/")
+
+    def test_reference_manifest_records_input_hashes(self):
+        outdir = self.work / "manifest-run"
+        self.ref.write_text(">chr1\nACGT\n")
+        self.gtf.write_text("chr1\ttest\tgene\t1\t4\t.\t+\t.\tgene_id \"g1\";\n")
+        self.run_cli("preprocessPE", self.r1, self.r2, outdir, "--ref-genome", self.ref, "--gtf-file", self.gtf)
+        manifest = json.loads((self.work / "ref" / "rsemRef" / ".seqworkflow-reference.json").read_text())
+        self.assertEqual(manifest["reference_genome"]["sha256"], hashlib.sha256(self.ref.read_bytes()).hexdigest())
+        self.assertEqual(manifest["annotation"]["sha256"], hashlib.sha256(self.gtf.read_bytes()).hexdigest())
+        self.assertEqual(manifest["annotation_type"], "--gtf")
+        self.assertEqual(manifest["prefix"], "reference")
+
+    def test_reference_manifest_rejects_incompatible_annotation(self):
+        reference_dir = self.work / "ref" / "rsemRef"
+        self.run_cli("preprocessPE", self.r1, self.r2, self.work / "run-a", "--ref-genome", self.ref, "--gtf-file", self.gtf)
+        other_gtf = self.touch("other-annotation.gtf")
+        other_gtf.write_text("different annotation\n")
+        result = self.run_cli_raw(
+            "preprocessPE",
+            self.r1,
+            self.r2,
+            self.work / "run-b",
+            "--ref-genome",
+            self.ref,
+            "--gtf-file",
+            other_gtf,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(f"Reference directory mismatch: {reference_dir.resolve()}", result.stderr)
+        self.assertIn("annotation", result.stderr)
+        self.assertIn("Use a distinct --rsem-ref-dir", result.stderr)
+
+    def test_reference_manifest_accepts_same_content_from_different_paths(self):
+        self.ref.write_text(">chr1\nACGT\n")
+        self.gtf.write_text("annotation\n")
+        self.run_cli("preprocessPE", self.r1, self.r2, self.work / "run-a", "--ref-genome", self.ref, "--gtf-file", self.gtf)
+        relocated_ref = self.touch("relocated-genome.fa")
+        relocated_gtf = self.touch("relocated-annotation.gtf")
+        relocated_ref.write_bytes(self.ref.read_bytes())
+        relocated_gtf.write_bytes(self.gtf.read_bytes())
+        self.run_cli(
+            "preprocessPE",
+            self.r1,
+            self.r2,
+            self.work / "run-b",
+            "--ref-genome",
+            relocated_ref,
+            "--gtf-file",
+            relocated_gtf,
+        )
+
+    def test_default_container_is_versioned(self):
+        outdir = self.work / "versioned-container"
+        self.run_cli("qcPE", self.r1, self.r2, outdir)
+        self.assert_config_contains(outdir, "qC_PE", "container: docker://ghcr.io/natmurad/seqworkflows:1.0.0")
 
     def test_qc_pe_config_and_links(self):
         outdir = self.work / "qC_PE"

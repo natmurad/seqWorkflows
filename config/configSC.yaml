@@ -34,8 +34,8 @@ raw_data_dir: /home/user/humanOocyteAging/
 ##################################################################################
 ########################     CELLRANGER PARAMS     ###############################
 ##################################################################################
-# Cellranger Ref Index dir
-crindexdir: /home/user/cellranger_ref/
+# Shared Cell Ranger reference index directory
+crindexdir: /home/user/rnaseq/ref/cellranger/
 
 step_cellrangerMap: cellranger_Counts/ # map to reference
 
@@ -44,6 +44,5 @@ cellranger_refsite: https://support.10xgenomics.com/single-cell-gene-expression/
 
 #refname: refdata-gex-mm10-2020-A # mouse
 refname: refdata-gex-GRCh38-2020-A # human
-
 
 

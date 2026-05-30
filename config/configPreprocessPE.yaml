@@ -49,8 +49,8 @@ gtf_file: /home/genome/Mus_musculus.GRCm39.105.gtf
 gtf_gff: "--gtf"
 #gtf_gff: "--gff3"
 
-# Rsem prepare ref dir
-rsemprepref: /home/genome/mouse/rsemRef/
+# Shared RSEM/STAR reference directory
+rsemprepref: /home/user/rnaseq/ref/rsemRef/
 
 # Reference prefix
 prefix_ref: "mouse_ref"

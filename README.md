@@ -135,21 +135,27 @@ If `--sample-file` or `--contrast-file` is omitted for a de novo mode, `seqworkf
 
 ## Output Layout
 
-Each run writes into the `OUTDIR` you provide:
+Each run writes into the `OUTDIR` you provide. Reference workflows keep the
+generated RSEM/STAR index in a shared sibling directory so later runs can reuse
+it:
 
 ```text
-OUTDIR/
-  config/                 generated YAML config for this run
-  input/                  symlinks to input FASTQs using pipeline naming
-  trimmed/                trimmed FASTQs
-  qC/                     FastQC, fastp, MultiQC and logs
-  map/                    STAR alignments
-  counts/                 RSEM outputs and count matrices
-  reference/rsemRef/      generated reference index, when needed
-  assembly_trinity/       Trinity outputs, when needed
+PARENT_DIR/
+  ref/rsemRef/            shared RSEM/STAR reference index, when needed
+  OUTDIR/
+    config/               generated YAML config for this run
+    input/                symlinks to input FASTQs using pipeline naming
+    trimmed/              trimmed FASTQs
+    qC/                   FastQC, fastp, MultiQC and logs
+    map/                  STAR alignments
+    counts/               RSEM outputs and count matrices
+    assembly_trinity/     Trinity outputs, when needed
 ```
 
 Actual subdirectories depend on the selected mode.
+
+Use a distinct `--rsem-ref-dir` for each genome build and annotation pair. Do
+not reuse an index generated from a different FASTA or GTF/GFF file.
 
 ## Containers
 

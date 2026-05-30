@@ -81,7 +81,7 @@ ref_genome: /path/to/genome.fa
 gtf_file: /path/to/annotation.gtf
 gtf_gff: "--gtf"
 
-rsemprepref: /path/to/project/output/reference/rsemRef/
+rsemprepref: /path/to/project/ref/rsemRef/
 prefix_ref: "reference"
 ```
 
@@ -143,10 +143,11 @@ The wrapper creates:
 OUTDIR/input/
 OUTDIR/config/preprocessPE.yaml
 OUTDIR/trimmed/
-OUTDIR/reference/rsemRef/
+OUTDIR/../ref/rsemRef/
 ```
 
 It symlinks the input FASTQs into `OUTDIR/input/` using the naming convention expected by the Snakefile.
+The shared `OUTDIR/../ref/rsemRef/` directory allows later runs to reuse the generated RSEM/STAR index. Use `--rsem-ref-dir` to select a distinct directory when changing the genome FASTA or annotation file.
 
 For a dry-run:
 

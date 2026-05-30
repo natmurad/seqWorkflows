@@ -66,6 +66,7 @@ class SeqworkflowCliTests(unittest.TestCase):
         )
         self.assertTrue((outdir / "input" / "S1_R1.fastq.gz").is_symlink())
         self.assertTrue((outdir / "input" / "S1_R2.fastq.gz").is_symlink())
+        self.assertTrue((outdir.parent / "ref" / "rsemRef").is_dir())
         self.assert_config_contains(
             outdir,
             "preprocessPE",
@@ -74,7 +75,33 @@ class SeqworkflowCliTests(unittest.TestCase):
             "strandedness: reverse",
             f"ref_genome: {self.ref.resolve()}",
             f"gtf_file: {self.gtf.resolve()}",
+            f"rsemprepref: {(outdir.parent / 'ref' / 'rsemRef').resolve()}/",
         )
+
+    def test_preprocess_pe_accepts_explicit_shared_reference_dir(self):
+        outdir = self.work / "preprocessPE-explicit-ref"
+        reference_dir = self.work / "references" / "grch38"
+        self.run_cli(
+            "preprocessPE",
+            self.r1,
+            self.r2,
+            outdir,
+            "--ref-genome",
+            self.ref,
+            "--gtf-file",
+            self.gtf,
+            "--rsem-ref-dir",
+            reference_dir,
+        )
+        self.assertTrue(reference_dir.is_dir())
+        self.assert_config_contains(outdir, "preprocessPE", f"rsemprepref: {reference_dir.resolve()}/")
+
+    def test_reference_runs_reuse_default_shared_reference_dir(self):
+        reference_dir = (self.work / "ref" / "rsemRef").resolve()
+        for name in ("run-a", "run-b"):
+            outdir = self.work / name
+            self.run_cli("preprocessPE", self.r1, self.r2, outdir, "--ref-genome", self.ref, "--gtf-file", self.gtf)
+            self.assert_config_contains(outdir, "preprocessPE", f"rsemprepref: {reference_dir}/")
 
     def test_qc_pe_config_and_links(self):
         outdir = self.work / "qC_PE"
@@ -87,7 +114,13 @@ class SeqworkflowCliTests(unittest.TestCase):
         outdir = self.work / "preprocessSE"
         self.run_cli("preprocessSE", self.se, outdir, "--ref-genome", self.ref, "--gtf-file", self.gtf)
         self.assertTrue((outdir / "input" / "S1.fastq.gz").is_symlink())
-        self.assert_config_contains(outdir, "preprocessSE", "samples: S1", "reads: ''")
+        self.assert_config_contains(
+            outdir,
+            "preprocessSE",
+            "samples: S1",
+            "reads: ''",
+            f"rsemprepref: {(outdir.parent / 'ref' / 'rsemRef').resolve()}/",
+        )
 
     def test_denovo_pe_generates_de_files(self):
         outdir = self.work / "denovoPE"
@@ -112,6 +145,7 @@ class SeqworkflowCliTests(unittest.TestCase):
             "samples: S1",
             f"ref_genome: {self.ref.resolve()}",
             "step_assembly: assembly_trinity/trinity/",
+            f"rsemprepref: {(outdir.parent / 'ref' / 'rsemRef').resolve()}/",
         )
 
 

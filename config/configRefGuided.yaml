@@ -58,8 +58,8 @@ ref_genome: /home/user/rnaseq/specie/reference_from_ensembl.fa
 gtf_file: /home/user/rnaseq/specie/annotation_file_from_ensembl.gff
 gtf_gff: --gff3
 
-# Rsem prepare ref dir
-rsemprepref: /home/user/rnaseq/specie/genomeIndex/
+# Shared RSEM/STAR reference directory
+rsemprepref: /home/user/rnaseq/ref/rsemRef/
 
 # Reference prefix
 prefix_ref: "specie_ref"

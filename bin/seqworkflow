@@ -195,7 +195,7 @@ def run_workflow(args):
     input_dir = args.outdir / "input"
     trimmed_dir = args.outdir / "trimmed"
     config_dir = args.outdir / "config"
-    reference_dir = Path(args.rsem_ref_dir).expanduser().resolve() if args.rsem_ref_dir else args.outdir / "reference" / "rsemRef"
+    reference_dir = Path(args.rsem_ref_dir).expanduser().resolve() if args.rsem_ref_dir else args.outdir.parent / "ref" / "rsemRef"
     assembly_dir = Path(args.assembly_dir).expanduser().resolve() if args.assembly_dir else args.outdir / "assembly_trinity"
 
     directories = [input_dir, trimmed_dir, config_dir]
@@ -245,7 +245,7 @@ def add_common_options(parser, pe=True, reference=False, denovo=False):
         parser.add_argument("--gtf-file", required=True, help="Annotation GTF/GFF file.")
         parser.add_argument("--strandedness", choices=("reverse", "forward", "unstranded"), default="reverse")
         parser.add_argument("--gtf-gff", choices=("--gtf", "--gff3"), default="--gtf")
-        parser.add_argument("--rsem-ref-dir", help="RSEM/STAR reference directory. Default: OUTDIR/reference/rsemRef.")
+        parser.add_argument("--rsem-ref-dir", help="Shared RSEM/STAR reference directory. Default: OUTDIR/../ref/rsemRef.")
         parser.add_argument("--prefix-ref", default="reference")
     else:
         parser.set_defaults(ref_genome=None, gtf_file=None, strandedness="reverse", gtf_gff="--gtf", rsem_ref_dir=None, prefix_ref="reference")

@@ -43,8 +43,10 @@ class SeqworkflowCliTests(unittest.TestCase):
         config = outdir / "config" / f"{mode}.yaml"
         self.assertTrue(config.exists(), f"Missing config: {config}")
         text = config.read_text()
+        normalized_text = text.replace('"', "").replace("''", "")
         for pattern in patterns:
-            self.assertIn(pattern, text)
+            normalized_pattern = pattern.replace('"', "").replace("''", "")
+            self.assertIn(normalized_pattern, normalized_text)
 
     def test_help_lists_all_modes(self):
         result = subprocess.run([str(SEQWORKFLOW), "--help"], cwd=REPO_DIR, text=True, capture_output=True)

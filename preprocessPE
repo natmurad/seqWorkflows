@@ -1,12 +1,20 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/user/seqWorkflows/config/configPreprocessPE.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configPreprocessPE.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
-import os
 import shutil
 import time
 
@@ -27,14 +35,28 @@ STEP_COUNTS = config["step_counts"] # quantify counts
 
 SAMPLES = config["samples"].split() # sample files
 #SRALIST = config["sralist"]
-LANE = config["lane"]
+LANE = str(config.get("lane") or "")
 FQ = config["fq"]
-READS = config["reads"]
+READS = str(config.get("reads") or "")
 ADAPTERS = config["adapters"]        # adapters sequences
 REF_GENOME = config["ref_genome"]
 GTF_FILE = config["gtf_file"]
 GTF_GFF = config["gtf_gff"]
 PREF = config["prefix_ref"]
+STRANDEDNESS = config.get("strandedness", config.get("strandness", "reverse"))
+RSEM_FORWARD_PROB = {
+    "unstranded": "0.5",
+    "forward": "1",
+    "reverse": "0",
+}
+
+if STRANDEDNESS not in RSEM_FORWARD_PROB:
+    raise ValueError(
+        f"Invalid strandedness '{STRANDEDNESS}'. Use one of: "
+        f"{', '.join(RSEM_FORWARD_PROB)}"
+    )
+
+RSEM_FORWARD_PROB_VALUE = RSEM_FORWARD_PROB[STRANDEDNESS]
 
 INPUTDIR = config["raw_data_dir"]    #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"]             # /home/user/
@@ -57,22 +79,22 @@ rule all:
         fastq_html2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # fastqc output after trimming
         trimmed = expand("{trim_dir}{sample}{lane}_{reads}1_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
-        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
         trimmed2 = expand("{trim_dir}{sample}{lane}_{reads}2_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
-        html_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # merged reports before trimming
-        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = f"{OUT_STEP_QC}fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = f"{OUT_STEP_QC}fastqcTrim/multiqc_report.html",
     ###------ PREPARE REFERENCE ------###
     # reference for alignments
-        rsemref = RSEMPREPREF + PREF + ".seq",
+        rsemref = f"{RSEMPREPREF}{PREF}.seq",
     ###------ MAPPING ------###
     # star align
-        reads_map = expand("{out_dir}{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE, reads=READS),
+        reads_map = expand("{out_dir}{sample}{lane}_{reads}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE, reads=READS),
     ###------ COUNT MATRIX ------###
     # rsem
-        counts = expand("{out_dir}{sample}{lane}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE, reads=READS),
+        counts = expand("{out_dir}{sample}{lane}_{reads}.genes.results", out_dir = OUT_STEP_COUNTS,  sample=SAMPLES, lane=LANE, reads=READS),
 
 
 
@@ -90,6 +112,11 @@ include:	"rules/PE/fastqcRAW.smk"
 #########################          TRIMMING          ##########################
 ###############################################################################
 include:	"rules/PE/trimmomatic.smk"
+
+###############################################################################
+#########################          FASTP             ##########################
+###############################################################################
+include:	"rules/PE/fastp.smk"
 
 ###############################################################################
 ###############          QUALITY REPORT TRIMMED DATA          #################
@@ -123,4 +150,3 @@ onsuccess:
     print("########------ PREPROCESSING FINISHED! ------##########\n")
     print("#######################################################\n")
     print("\n\nRunning time in minutes: %s\n" % round((time.time() - start)/60,1))
-    shutil.rmtree(".snakemake")

@@ -1,13 +1,21 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/user/seqWorkflows/config/configDenovoPE.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configDenovoPE.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
 import io 
-import os
 import pandas as pd
 import pathlib
 from snakemake.exceptions import print_exception, WorkflowError
@@ -26,10 +34,10 @@ STEP_CDHIT = config["step_cdhit"]
 STEP_ANNOTATION = config["step_annotation"]
 
 SAMPLES = config["samples"].split() # sample files
-LANE = config["lane"]
+LANE = str(config.get("lane") or "")
 FQ = config['fq']
 ADAPTERS = config['adapters']
-READS = config['reads'].split()
+READS = str(config.get('reads') or "")
 
 INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
@@ -56,17 +64,17 @@ rule all:
     input:
     ###------ QUALITY CONTROL ------###
 #     fastqc output before trimming
-        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_1_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        fastq_zip = expand("{out_dir_name}fastqcRaw/{sample}{lane}_1_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        fastq_html2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        fastq_zip2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}1_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_zip = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}1_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_html2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_zip2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # fastqc output after trimming
-        trimmed = expand("{trim_dir}{sample}{lane}_1_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_1_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        zip_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_1_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        trimmed2 = expand("{trim_dir}{sample}{lane}_2_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-        html_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_2_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-        zip_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_2_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        trimmed = expand("{trim_dir}{sample}{lane}_{reads}1_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        zip_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        trimmed2 = expand("{trim_dir}{sample}{lane}_{reads}2_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        zip_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # merged reports before trimming
         raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
     # merged reports after trimming
@@ -134,6 +142,11 @@ include:	"rules/PE/fastqcRAW.smk"
 include:	"rules/PE/trimmomatic.smk"
 
 ###############################################################################
+#########################          FASTP             ##########################
+###############################################################################
+include:	"rules/PE/fastp.smk"
+
+###############################################################################
 ###############          QUALITY REPORT TRIMMED DATA          #################
 ###############################################################################
 include:	"rules/PE/fastqcTRIM.smk"
@@ -141,7 +154,7 @@ include:	"rules/PE/fastqcTRIM.smk"
 ###############################################################################
 ######################          MERGE REPORTS          ########################
 ###############################################################################
-include:	"rules/BOTH/multiqc.smk"
+include:	"rules/PE/multiqc.smk"
 
 #>>>>>>>>>>>>>>------              ASSEMBLY            --------<<<<<<<<<<<<<<<<
 

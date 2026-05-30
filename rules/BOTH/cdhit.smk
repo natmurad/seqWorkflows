@@ -12,8 +12,8 @@ rule cdhit:
         c = '0.97',
         mem = 5000
     message: "\n\n######------ REMOVING REDUNDANCE WITH CDHIT ------######\n"
-    singularity:
-        "docker://chrishah/cdhit:v4.8.1"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd-hit-est -i {input.trinity} \
         -o {output.assemblyfilt} -c {params.c} -T {params.t} \

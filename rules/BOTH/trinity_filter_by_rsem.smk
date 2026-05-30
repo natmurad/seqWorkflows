@@ -12,8 +12,8 @@ rule filter_fasta_by_rsem_values:
     message: "\n\n######------ FILTERING ASSEMBLY BY RSEM EXPRESSION ------######\n"
     output:
         assemblyfilt = ASSEMBLYDIR + "Trinity.filt.fasta",
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
          /usr/local/bin/util/filter_fasta_by_rsem_values.pl --rsem_output {input.rsem_out} \
             --fasta {input.assembly} \

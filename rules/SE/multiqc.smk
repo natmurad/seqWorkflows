@@ -9,17 +9,21 @@ rule multiqc_report:
         trimmed = expand("{out_dir}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir = OUT_STEP_QC,
                          sample=SAMPLES, lane=LANE)
     output:
-        raw_html   = OUT_STEP_QC + "fastqcRaw/multiqc_report.html", 
-        trim_html  = OUT_STEP_QC + "fastqcTrim/multiqc_report.html" 
+        raw_html   = f"{OUT_STEP_QC}fastqcRaw/multiqc_report.html",
+        trim_html  = f"{OUT_STEP_QC}fastqcTrim/multiqc_report.html"
+    log:
+        f"{OUT_STEP_QC}logs/multiqc.log"
     params:
-        outdirRaw = OUT_STEP_QC + "fastqcRaw/",
-        outdirTrim = OUT_STEP_QC + "fastqcTrim/"
-    singularity:
-        "docker://staphb/multiqc"
+        outdirRaw = f"{OUT_STEP_QC}fastqcRaw/",
+        outdirTrim = f"{OUT_STEP_QC}fastqcTrim/",
+        logdir = f"{OUT_STEP_QC}logs/"
+    container:
+        SEQWORKFLOWS_CONTAINER
     message: "\n\n######------ MERGING QUALITY REPORTS ------######\n"
     # run to raw data
     # run to trimmed data
     shell:"""
-        multiqc {params.outdirRaw} --force --outdir {params.outdirRaw} &&
-        multiqc {params.outdirTrim} --force --outdir {params.outdirTrim}
+        mkdir -p {params.outdirRaw} {params.outdirTrim} {params.logdir}
+        multiqc {params.outdirRaw} --force --outdir {params.outdirRaw} > {log} 2>&1
+        multiqc {params.outdirTrim} --force --outdir {params.outdirTrim} >> {log} 2>&1
     """

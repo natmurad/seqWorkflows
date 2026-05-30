@@ -13,8 +13,8 @@ rule HMMSCAN:
         c = '0.97',
         mem = 5000
     message: "\n\n######------ HMMER SEARCH AGAINST THE PFAM DATABASE ------######\n"
-    singularity:
-        "docker://ss93/trinotate-3.2.1"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         hmmpress -f {input.db} &&
         hmmscan --cpu {params.t} --domtblout {output.out} \

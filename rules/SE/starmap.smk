@@ -4,21 +4,24 @@
 
 rule map:
     input:
-        reads = TRIMMEDDIR + "{sample}{lane}" + "_trimmed.fq.gz",
-        ref = RSEMPREPREF + PREF + ".seq"
+        reads = f"{TRIMMEDDIR}{{sample}}{{lane}}_trimmed.fq.gz",
+        ref = f"{RSEMPREPREF}{PREF}.seq"
     output:
-        align = OUT_STEP_MAP + "{sample}{lane}Aligned.sortedByCoord.out.bam", # sample.aligned.sortedByCoord.out.bam
-        talign = OUT_STEP_MAP + "{sample}{lane}Aligned.toTranscriptome.out.bam"
+        align = f"{OUT_STEP_MAP}{{sample}}{{lane}}Aligned.sortedByCoord.out.bam",
+        talign = f"{OUT_STEP_MAP}{{sample}}{{lane}}Aligned.toTranscriptome.out.bam"
+    threads: THREADS
+    log:
+        f"{OUT_STEP_MAP}logs/star/{{sample}}{{lane}}.log"
     params:
-        t = THREADS,
-        outPref =  OUT_STEP_MAP + "{sample}{lane}",
-        refdir = STARINDEXDIR
+        outPref =  f"{OUT_STEP_MAP}{{sample}}{{lane}}",
+        refdir = STARINDEXDIR,
+        outdir = OUT_STEP_MAP,
+        logdir = f"{OUT_STEP_MAP}logs/star/"
     message: "\n\n######------ MAPPING READS TO THE REFERENCE WITH STAR - SAMPLE = {wildcards.sample} ------######\n"
-    singularity:
-        "docker://dceoy/star"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         ulimit -n 10000
-        rm -rf {params.outPref}
-        mkdir -p {params.outPref}
-        STAR --genomeDir {params.refdir} --readFilesIn {input.reads} --runThreadN {params.t} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM GeneCounts --outFileNamePrefix {params.outPref}
+        mkdir -p {params.outdir} {params.logdir}
+        STAR --genomeDir {params.refdir} --readFilesIn {input.reads} --runThreadN {threads} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM GeneCounts --outFileNamePrefix {params.outPref} > {log} 2>&1
   """

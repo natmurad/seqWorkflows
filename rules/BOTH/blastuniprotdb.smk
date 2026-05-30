@@ -7,8 +7,8 @@ rule blastdb:
         uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta"
     output:
         pdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb"
-    singularity:
-        "docker://ncbi/blast"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         makeblastdb -in {input.uniprotdb}  -dbtype prot
         """

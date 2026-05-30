@@ -14,8 +14,8 @@ rule run_geneLen:
     output:
         seqLens = INPUTDIR + "diff_exp/Trinity.fasta.seq_lens",
         gene_lengths = INPUTDIR + "Trinity.gene_lengths.txt"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
             cd {params.out_dir} &&
             /usr/local/bin/util/misc/fasta_seq_length.pl  {input.assembly} > {output.seqLens} &&

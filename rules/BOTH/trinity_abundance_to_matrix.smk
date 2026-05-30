@@ -15,8 +15,8 @@ rule abundance_to_matrix:
         mtx =  OUT_STEP_COUNTS + "RSEM.isoform.counts.matrix",
         mtx_gene =  OUT_STEP_COUNTS + "RSEM.gene.counts.matrix",
         tmm = OUT_STEP_COUNTS + "RSEM.isoform.TMM.EXPR.matrix"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.out_dir} &&
         $TRINITY_HOME/util/abundance_estimates_to_matrix.pl --est_method {params.est_method} \

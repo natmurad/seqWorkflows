@@ -10,8 +10,8 @@ rule fastqdumpPE:
         fastq2 = INPUTDIR + "{samples}_2{fq}",
     params:
         out_dir = INPUTDIR
-    singularity:
-        "docker://pegi3s/sratoolkit"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         fastq-dump --split-3 --skip-technical \
         -O {params.out_dir} --gzip  {input.sra}

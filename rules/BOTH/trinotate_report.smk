@@ -14,8 +14,8 @@ rule trinotate_report:
     params:
         dir = OUT_STEP_ANNOTATION
     message: "\n\n######------ LOADING FILES GENERATED IN PREVIOUS STEPS AND GENERATING REPORT ------######\n"
-    singularity:
-        "docker://ss93/trinotate-3.2.1"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.dir} &&
         Trinotate {input.trinotatesqlite} \

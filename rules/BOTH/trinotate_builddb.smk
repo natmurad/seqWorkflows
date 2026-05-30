@@ -12,8 +12,8 @@ rule build_db:
     params:
         db = OUT_STEP_ANNOTATION + "Trinotate",
     message: "\n\n######------ DOWNLOAD TRINOTATE SQLITE DB ------######\n"
-    singularity:
-        "docker://trinityrnaseq/trinotate"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         /usr/local/src/Trinotate/util/admin//Build_Trinotate_Boilerplate_SQLite_db.pl {params.db}
         """

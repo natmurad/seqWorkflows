@@ -8,7 +8,7 @@ lane: ""
 
 fq: ".fastq.gz"
 
-reads: "_1 _2"
+reads: "R"
 
 contrasts: "A_vs_B"
 
@@ -46,4 +46,3 @@ trimmed_dir: /home/user/rnaseq/specie/trimmed/
 # Path to assembly output
 assembly_dir: /home/user/rnaseq/specie/assembly_trinity/
 assembly_name: "trinity.Trinity.fasta"
-

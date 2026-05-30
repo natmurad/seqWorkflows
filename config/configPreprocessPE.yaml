@@ -24,6 +24,13 @@ adapters: "TruSeq3-PE-2.fa"
 # threads
 threads: 10
 
+# Library strandedness for RSEM.
+# Options:
+#   unstranded -> --forward-prob 0.5
+#   forward    -> --forward-prob 1
+#   reverse    -> --forward-prob 0
+strandedness: "reverse"
+
 ## Directories
 # Base data dir
 base_dir: /home/user/data/
@@ -35,7 +42,7 @@ raw_data_dir: /home/user/data/
 trimmed_dir: /home/user/data/trimmed/
 
 # Path to reference genome
-ref_genome: ref_genome: /home/genome/Mus_musculus.GRCm39.dna.toplevel.fa
+ref_genome: /home/genome/Mus_musculus.GRCm39.dna.toplevel.fa
 
 # Path to gtf file
 gtf_file: /home/genome/Mus_musculus.GRCm39.105.gtf

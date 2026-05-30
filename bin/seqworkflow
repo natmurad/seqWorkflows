@@ -1,0 +1,359 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
+
+REPO_DIR = Path(__file__).resolve().parents[1]
+
+PE_WORKFLOWS = {"preprocessPE", "denovoPE", "qC_PE", "refguidedPE"}
+SE_WORKFLOWS = {"preprocessSE", "denovoSE"}
+REFERENCE_WORKFLOWS = {"preprocessPE", "preprocessSE", "refguidedPE"}
+DENOVO_WORKFLOWS = {"denovoPE", "denovoSE", "refguidedPE"}
+MODE_ALIASES = {
+    "qcPE": "qC_PE",
+    "qc-pe": "qC_PE",
+    "qc_pe": "qC_PE",
+}
+
+
+def fq_suffix(path):
+    name = path.name
+    for suffix in (".fastq.gz", ".fq.gz", ".fastq", ".fq"):
+        if name.endswith(suffix):
+            return suffix
+    raise SystemExit(f"Unsupported FASTQ extension: {path}")
+
+
+def sample_from_fastq(path):
+    name = path.name
+    for token in ("_R1", "_R2", "_1", "_2", ".R1", ".R2", ".1", ".2"):
+        if token in name:
+            return name.split(token)[0]
+    for suffix in (".fastq.gz", ".fq.gz", ".fastq", ".fq"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return path.stem
+
+
+def write_yaml(path, data):
+    if yaml is not None:
+        with path.open("w") as handle:
+            yaml.safe_dump(data, handle, sort_keys=False)
+        return
+
+    with path.open("w") as handle:
+        for key, value in data.items():
+            if isinstance(value, str):
+                handle.write(f'{key}: "{value}"\n')
+            else:
+                handle.write(f"{key}: {value}\n")
+
+
+def link_fastq(source, dest):
+    if dest.exists() or dest.is_symlink():
+        dest.unlink()
+    dest.symlink_to(source.resolve())
+
+
+def copy_or_write(source, dest, default_text):
+    if source:
+        src = Path(source).expanduser().resolve()
+        if not src.exists():
+            raise SystemExit(f"File not found: {src}")
+        shutil.copyfile(src, dest)
+        return
+    if not dest.exists():
+        dest.write_text(default_text)
+
+
+def ensure_file(path, label):
+    resolved = Path(path).expanduser().resolve()
+    if not resolved.exists():
+        raise SystemExit(f"{label} not found: {resolved}")
+    return resolved
+
+
+def snakemake_command(args, snakefile):
+    cmd = shlex.split(args.snakemake) + ["-s", str(REPO_DIR / snakefile), "-j", str(args.jobs)]
+    if args.dry_run:
+        cmd.append("-n")
+    runtime = args.use_containers or args.runtime
+    if runtime in {"apptainer", "singularity", "conda"}:
+        cmd.extend(["--sdm", runtime])
+    if args.snakemake_args:
+        cmd.extend(shlex.split(args.snakemake_args))
+    return cmd
+
+
+def run_snakemake(args, config_path):
+    cmd = snakemake_command(args, args.workflow)
+    env = os.environ.copy()
+    env["SEQWORKFLOWS_CONFIG"] = str(config_path)
+    warning_filter = "ignore:pkg_resources is deprecated as an API:UserWarning:stopit"
+    if env.get("PYTHONWARNINGS"):
+        env["PYTHONWARNINGS"] = f"{env['PYTHONWARNINGS']},{warning_filter}"
+    else:
+        env["PYTHONWARNINGS"] = warning_filter
+
+    print(f"Config: {config_path}", flush=True)
+    print("Command:", " ".join(cmd), flush=True)
+    return subprocess.call(cmd, cwd=REPO_DIR, env=env)
+
+
+def base_config(args, input_dir, trimmed_dir, suffix):
+    return {
+        "samples": args.sample,
+        "lane": args.lane,
+        "reads": args.reads,
+        "fq": suffix,
+        "step_qC": "qC/",
+        "adapters": args.adapters,
+        "threads": args.threads,
+        "container": args.container_image,
+        "base_dir": f"{args.outdir}/",
+        "raw_data_dir": f"{input_dir}/",
+        "trimmed_dir": f"{trimmed_dir}/",
+    }
+
+
+def add_reference_config(config, args, ref_dir):
+    ref_genome = ensure_file(args.ref_genome, "Reference genome")
+    gtf_file = ensure_file(args.gtf_file, "Annotation file")
+    config.update(
+        {
+            "step_map": "map/",
+            "step_counts": "counts/",
+            "strandedness": args.strandedness,
+            "ref_genome": str(ref_genome),
+            "gtf_file": str(gtf_file),
+            "gtf_gff": args.gtf_gff,
+            "rsemprepref": f"{ref_dir}/",
+            "prefix_ref": args.prefix_ref,
+        }
+    )
+
+
+def add_denovo_config(config, args, assembly_dir, input_dir):
+    default_contrast = args.contrasts.replace("_vs_", "\t")
+    config.update(
+        {
+            "step_assembly": "assembly_trinity/trinity/",
+            "step_map": "map/",
+            "step_counts": "counts/",
+            "step_transdecoder": "transdecoder/",
+            "step_cdhit": "cdHit/",
+            "step_annotation": "annotation/",
+            "assembly_dir": f"{assembly_dir}/",
+            "assembly_name": args.assembly_name,
+            "contrasts": args.contrasts,
+        }
+    )
+    copy_or_write(
+        args.sample_file,
+        input_dir / "sample_file.txt",
+        f"{args.sample}\t{args.group}\n",
+    )
+    copy_or_write(
+        args.contrast_file,
+        input_dir / "contrast_file.txt",
+        f"{default_contrast}\n",
+    )
+
+
+def prepare_pe_inputs(args, input_dir, suffix):
+    link_fastq(args.r1, input_dir / f"{args.sample}{args.lane}_{args.reads}1{suffix}")
+    link_fastq(args.r2, input_dir / f"{args.sample}{args.lane}_{args.reads}2{suffix}")
+
+
+def prepare_se_inputs(args, input_dir, suffix):
+    link_fastq(args.r1, input_dir / f"{args.sample}{args.lane}{suffix}")
+
+
+def run_workflow(args):
+    args.r1 = ensure_file(args.r1, "R1/FASTQ")
+    if args.workflow in PE_WORKFLOWS:
+        args.r2 = ensure_file(args.r2, "R2 FASTQ")
+
+    suffix = fq_suffix(args.r1)
+    if args.workflow in PE_WORKFLOWS and fq_suffix(args.r2) != suffix:
+        raise SystemExit("R1 and R2 must use the same FASTQ extension.")
+
+    args.outdir = Path(args.outdir).expanduser().resolve()
+    args.sample = args.sample or sample_from_fastq(args.r1)
+
+    input_dir = args.outdir / "input"
+    trimmed_dir = args.outdir / "trimmed"
+    config_dir = args.outdir / "config"
+    reference_dir = Path(args.rsem_ref_dir).expanduser().resolve() if args.rsem_ref_dir else args.outdir / "reference" / "rsemRef"
+    assembly_dir = Path(args.assembly_dir).expanduser().resolve() if args.assembly_dir else args.outdir / "assembly_trinity"
+
+    directories = [input_dir, trimmed_dir, config_dir]
+    if args.workflow in REFERENCE_WORKFLOWS:
+        directories.append(reference_dir)
+    if args.workflow in DENOVO_WORKFLOWS:
+        directories.append(assembly_dir)
+    for directory in directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    if args.workflow in PE_WORKFLOWS:
+        prepare_pe_inputs(args, input_dir, suffix)
+    else:
+        prepare_se_inputs(args, input_dir, suffix)
+
+    config = base_config(args, input_dir, trimmed_dir, suffix)
+    if args.workflow in REFERENCE_WORKFLOWS:
+        add_reference_config(config, args, reference_dir)
+    if args.workflow in DENOVO_WORKFLOWS:
+        add_denovo_config(config, args, assembly_dir, input_dir)
+
+    config_path = config_dir / f"{args.workflow}.yaml"
+    write_yaml(config_path, config)
+    return run_snakemake(args, config_path)
+
+
+def add_common_options(parser, pe=True, reference=False, denovo=False):
+    parser.add_argument("r1", help="R1 FASTQ file for PE, or FASTQ file for SE.")
+    if pe:
+        parser.add_argument("r2", help="R2 FASTQ file.")
+    parser.add_argument("outdir", help="Output directory.")
+    parser.add_argument("--sample", help="Sample name. Default: inferred from FASTQ name.")
+    parser.add_argument("--lane", default="", help='Lane token used in filenames. Default: "".')
+    parser.add_argument("--reads", default="R" if pe else "", help='Read token used in filenames. Default: "R" for PE, "" for SE.')
+    parser.add_argument("--threads", type=int, default=10, help="Threads per rule. Default: 10.")
+    parser.add_argument("--jobs", type=int, default=1, help="Snakemake jobs. Default: 1.")
+    parser.add_argument("--adapters", default="TruSeq3-PE-2.fa" if pe else "TruSeq3-SE.fa")
+    parser.add_argument("--snakemake", default="snakemake", help="Snakemake executable. Default: snakemake.")
+    parser.add_argument("--dry-run", action="store_true", help="Run Snakemake with -n.")
+    parser.add_argument("--runtime", choices=("local", "apptainer", "singularity", "conda", "orbstack"), default="local", help="Execution runtime. Default: local.")
+    parser.add_argument("--use-containers", choices=("apptainer", "singularity", "conda"), help="Deprecated alias for --runtime.")
+    parser.add_argument("--container-image", default=os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"), help="Container image/SIF used by Snakemake container directives.")
+    parser.add_argument("--snakemake-args", default="", help="Extra quoted arguments passed to Snakemake.")
+
+    if reference:
+        parser.add_argument("--ref-genome", required=True, help="Reference genome FASTA.")
+        parser.add_argument("--gtf-file", required=True, help="Annotation GTF/GFF file.")
+        parser.add_argument("--strandedness", choices=("reverse", "forward", "unstranded"), default="reverse")
+        parser.add_argument("--gtf-gff", choices=("--gtf", "--gff3"), default="--gtf")
+        parser.add_argument("--rsem-ref-dir", help="RSEM/STAR reference directory. Default: OUTDIR/reference/rsemRef.")
+        parser.add_argument("--prefix-ref", default="reference")
+    else:
+        parser.set_defaults(ref_genome=None, gtf_file=None, strandedness="reverse", gtf_gff="--gtf", rsem_ref_dir=None, prefix_ref="reference")
+
+    if denovo:
+        parser.add_argument("--assembly-dir", help="Assembly directory. Default: OUTDIR/assembly_trinity.")
+        parser.add_argument("--assembly-name", default="trinity.Trinity.fasta")
+        parser.add_argument("--contrasts", default="A_vs_B", help='Contrast name(s), e.g. "A_vs_B".')
+        parser.add_argument("--sample-file", help="Trinity sample_file.txt. Default: minimal file is generated.")
+        parser.add_argument("--contrast-file", help="Trinity contrast_file.txt. Default: minimal file is generated.")
+        parser.add_argument("--group", default="A", help="Group used in generated sample_file.txt. Default: A.")
+    else:
+        parser.set_defaults(assembly_dir=None, assembly_name="trinity.Trinity.fasta", contrasts="A_vs_B", sample_file=None, contrast_file=None, group="A")
+
+    parser.set_defaults(func=run_workflow)
+
+
+def build_parser():
+    command_name = os.environ.get("SEQWORKFLOWS_COMMAND", Path(sys.argv[0]).name)
+    parser = argparse.ArgumentParser(
+        prog=command_name,
+        description="Run seqWorkflows modes from one command without editing config YAML by hand.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent(
+            f"""
+            Quick usage:
+              {command_name} preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR --ref-genome genome.fa --gtf-file genes.gtf
+              {command_name} preprocessSE reads.fastq.gz OUTDIR --ref-genome genome.fa --gtf-file genes.gtf
+              {command_name} qcPE R1.fastq.gz R2.fastq.gz OUTDIR
+              {command_name} denovoPE R1.fastq.gz R2.fastq.gz OUTDIR
+              {command_name} denovoSE reads.fastq.gz OUTDIR
+              {command_name} refguidedPE R1.fastq.gz R2.fastq.gz OUTDIR --ref-genome genome.fa --gtf-file genes.gtf
+
+            Common options, available in all modes:
+              --sample NAME                 Sample name; inferred from FASTQ if omitted
+              --lane TOKEN                  Lane token used in expected filenames
+              --reads TOKEN                 Read token; default R for PE, empty for SE
+              --threads N                   Threads per rule; default 10
+              --jobs N                      Snakemake jobs; default 1
+              --adapters FILE               Trimmomatic adapter FASTA
+              --dry-run                     Build the DAG without running commands
+              --runtime local|apptainer|singularity|conda|orbstack
+              --container-image IMAGE       SIF path or Docker image for rule containers
+              --snakemake CMD               Snakemake executable, e.g. "conda run -n snakemake snakemake"
+              --snakemake-args "ARGS"       Extra arguments passed to Snakemake
+
+            Reference modes only: preprocessPE, preprocessSE, refguidedPE
+              --ref-genome FILE             Reference genome FASTA
+              --gtf-file FILE               Annotation GTF/GFF
+              --strandedness reverse|forward|unstranded
+              --gtf-gff --gtf|--gff3
+              --rsem-ref-dir DIR
+              --prefix-ref NAME
+
+            De novo/reference-guided modes only: denovoPE, denovoSE, refguidedPE
+              --assembly-dir DIR
+              --assembly-name FILE
+              --contrasts NAME              Example: A_vs_B
+              --sample-file FILE            Trinity sample_file.txt
+              --contrast-file FILE          Trinity contrast_file.txt
+              --group NAME                  Used for generated sample_file.txt
+
+            Containers:
+              Apptainer:
+                {command_name} preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR \\
+                  --ref-genome genome.fa --gtf-file genes.gtf \\
+                  --runtime apptainer --container-image seqworkflows.sif
+
+              OrbStack/Docker:
+                docker run --rm -it -v "$PWD:/work" -w /work seqworkflows:latest \\
+                  bin/{command_name} preprocessPE R1.fastq.gz R2.fastq.gz OUTDIR \\
+                    --ref-genome genome.fa --gtf-file genes.gtf --runtime orbstack
+
+            More detail for a mode:
+              {command_name} preprocessPE --help
+              {command_name} denovoPE --help
+
+            Compatibility:
+              qC_PE is still accepted as an alias for qcPE.
+            """
+        ),
+    )
+    subparsers = parser.add_subparsers(dest="workflow", required=True)
+
+    modes = {
+        "preprocessPE": {"pe": True, "reference": True, "denovo": False, "help": "Paired-end preprocessing and reference quantification."},
+        "preprocessSE": {"pe": False, "reference": True, "denovo": False, "help": "Single-end preprocessing and reference quantification."},
+        "qC_PE": {"pe": True, "reference": False, "denovo": False, "help": "Paired-end QC and trimming only. Preferred public name: qcPE."},
+        "denovoPE": {"pe": True, "reference": False, "denovo": True, "help": "Paired-end de novo transcriptome workflow."},
+        "denovoSE": {"pe": False, "reference": False, "denovo": True, "help": "Single-end de novo transcriptome workflow."},
+        "refguidedPE": {"pe": True, "reference": True, "denovo": True, "help": "Reference-guided transcriptome workflow."},
+    }
+
+    for mode, options in modes.items():
+        aliases = ["qcPE"] if mode == "qC_PE" else []
+        sub = subparsers.add_parser(mode, aliases=aliases, help=options.pop("help"))
+        add_common_options(sub, **options)
+
+    return parser
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] in MODE_ALIASES:
+        sys.argv[1] = MODE_ALIASES[sys.argv[1]]
+    parser = build_parser()
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

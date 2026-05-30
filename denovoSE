@@ -1,13 +1,21 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configDenovoSE.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configDenovoSE.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
 import io 
-import os
 import pandas as pd
 import pathlib
 from snakemake.exceptions import print_exception, WorkflowError
@@ -26,17 +34,17 @@ STEP_CDHIT = config["step_cdhit"]
 STEP_ANNOTATION = config["step_annotation"]
 
 SAMPLES = config["samples"].split() # sample files
-LANE = config["lane"]
-NUM = config["reads"].split()
+LANE = str(config.get("lane") or "")
 FQ = config['fq']
 ADAPTERS = config['adapters']
-READS = config['reads']
+READS = str(config.get('reads') or "")
 
 INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
 TRIMMEDDIR =  config['trimmed_dir'] # os.path.join(DIR, "/trimmed/")
 ASSEMBLYDIR = config['assembly_dir']
 ASSEMBLY = config['assembly_name']
+CONTRAST = config.get('contrasts', 'A_vs_B').split()
 
 OUT_STEP_QC = os.path.join(INPUTDIR, STEP_QC) # /home/dataset/qC
 OUT_STEP_ASSEMBLY = os.path.join(INPUTDIR, STEP_ASSEMBLY) # /home/dataset/map
@@ -104,10 +112,10 @@ rule all:
 
 
     ##############################################------ GO ANALYSIS ------######################################################
-        factorLabel = INPUTDIR + "diff_exp/DESeq2_gene/factor_labeling.txt",
+        factorLabel = expand("{dir}diff_exp/DESeq2_gene/factor_labeling{contrasts}.txt", dir = INPUTDIR, contrasts=CONTRAST),
         seqLens = INPUTDIR + "diff_exp/Trinity.fasta.seq_lens",
         gene_lengths = INPUTDIR + "Trinity.gene_lengths.txt",
-        go_res = INPUTDIR + "diff_exp/DESeq2_gene/A_B.GOseq.enriched",
+        outputlog =  expand("{dir}diff_exp/DESeq2_gene/go/{contrasts}/{contrasts}GODONE.txt", dir = INPUTDIR, contrasts=CONTRAST),
 
 #>>>>>>>>>>>>>>------           QUALITY CONTROL        --------<<<<<<<<<<<<<<<<
 
@@ -129,7 +137,7 @@ include:	"rules/SE/fastqcTRIM.smk"
 ###############################################################################
 ######################          MERGE REPORTS          ########################
 ###############################################################################
-include:	"rules/BOTH/multiqc.smk"
+include:	"rules/SE/multiqc.smk"
 
 #>>>>>>>>>>>>>>------              ASSEMBLY            --------<<<<<<<<<<<<<<<<
 
@@ -253,6 +261,11 @@ include:	"rules/BOTH/trinotate_extract_GO.smk"
 #####################             FACTOR LEN           ########################
 ###############################################################################
 include:	"rules/BOTH/factor_len.smk"
+
+###############################################################################
+#####################             GENE LEN             ########################
+###############################################################################
+include:	"rules/BOTH/trinity_gene_len.smk"
 
 ###############################################################################
 #####################             RUN GOSEQ            ########################

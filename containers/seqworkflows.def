@@ -1,0 +1,35 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%files
+    env/seqworkflows.yml /tmp/seqworkflows.yml
+    env/seqworkflows-linux-64.lock.yml /tmp/seqworkflows-linux-64.lock.yml
+
+%post
+    micromamba install -y -n base -f /tmp/seqworkflows-linux-64.lock.yml
+    micromamba clean -a -y
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+    export LC_ALL=C
+    export SEQWORKFLOWS_CONTAINER=docker://seqworkflows:latest
+
+%runscript
+    exec "$@"
+
+%test
+    snakemake --version
+    fastqc --version
+    trimmomatic -version
+    fastp --version
+    multiqc --version
+    STAR --version
+    rsem-calculate-expression --version
+    samtools --version
+    Trinity --version
+    bowtie2 --version
+    blastp -version
+    cd-hit-est -h >/dev/null
+    busco --version
+    TransDecoder.LongOrfs -h >/dev/null
+    hmmscan -h >/dev/null

@@ -11,8 +11,8 @@ rule index:
         # --sjdbOverhang ReadLength-1
     params:
         t = THREADS
-    singularity:
-        "docker://quay.io/biocontainers/star"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         STAR --runThreadN {params.t} --runMode genomeGenerate --genomeDir {output} --genomeFastaFiles {input.fa} --sjdbGTFfile {input.gtf} --sjdbOverhang 100
     """

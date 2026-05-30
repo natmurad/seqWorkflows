@@ -14,8 +14,8 @@ rule align_and_estimate_abundance:
     output:
         counts =  OUT_STEP_COUNTS + "{sample}{lane}/RSEM.genes.results",
         iso =  OUT_STEP_COUNTS + "{sample}{lane}/RSEM.isoforms.results"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         /usr/local/bin/util/align_and_estimate_abundance.pl --transcripts {input.assembly} \
             --seqType {params.seqType} \

@@ -24,6 +24,13 @@ adapters: "TruSeq3-SE.fa"
 # threads
 threads: 10
 
+# Library strandedness for RSEM.
+# Options:
+#   unstranded -> --forward-prob 0.5
+#   forward    -> --forward-prob 1
+#   reverse    -> --forward-prob 0
+strandedness: "reverse"
+
 ## Directories
 # Base data dir
 base_dir: /home/user/data/

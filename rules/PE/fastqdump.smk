@@ -13,8 +13,8 @@ rule fastqdump:
     wildcard_constraints:
         sample="^[a-zA-Z][a-zA-Z0-9]*$"
     message: "\n\n######------ FASTQ-DUMP - SAMPLE = {wildcards.sample} ------######\n"
-    singularity:
-        "docker://pegi3s/sratoolkit"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         fastq-dump --split-3 --skip-technical \
         -O {params.out_dir} --gzip  {input.sra}

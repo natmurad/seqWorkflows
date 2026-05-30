@@ -5,8 +5,8 @@
 
 rule align_and_estimate_abundance:
     input:
-        right = TRIMMEDDIR + "{sample}{lane}" + "_1_trimmed.fq.gz",
-        left = TRIMMEDDIR + "{sample}{lane}" + "_2_trimmed.fq.gz",
+        left = f"{TRIMMEDDIR}{{sample}}{{lane}}_{READS}1_trimmed.fq.gz",
+        right = f"{TRIMMEDDIR}{{sample}}{{lane}}_{READS}2_trimmed.fq.gz",
         assembly = ASSEMBLYDIR + ASSEMBLY
     params:
         seqType = 'fq',
@@ -16,8 +16,8 @@ rule align_and_estimate_abundance:
     output:
         counts =  OUT_STEP_COUNTS + "{sample}{lane}/RSEM.genes.results",
         iso =  OUT_STEP_COUNTS + "{sample}{lane}/RSEM.isoforms.results"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         /usr/local/bin/util/align_and_estimate_abundance.pl --transcripts {input.assembly} \
             --seqType {params.seqType} \

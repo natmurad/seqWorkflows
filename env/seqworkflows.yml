@@ -1,0 +1,29 @@
+name: seqworkflows
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - setuptools<81
+  - snakemake-minimal
+  - pyyaml
+  - fastqc
+  - trimmomatic
+  - fastp
+  - multiqc
+  - star
+  - rsem
+  - samtools
+  - sra-tools
+  - trinity
+  - bowtie2
+  - blast
+  - cd-hit
+  - busco
+  - transdecoder
+  - hmmer
+  - trinotate
+  - bioconductor-deseq2
+  - bioconductor-goseq
+  - pigz
+  - coreutils

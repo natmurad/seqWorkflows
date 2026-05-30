@@ -9,9 +9,10 @@ rule fastqdump:
         fastq = INPUTDIR + "{samples}" + FQ
     params:
         out_dir = INPUTDIR
-    
-    singularity:
-        "docker://pegi3s/sratoolkit"
+
+    container:
+
+        SEQWORKFLOWS_CONTAINER
     message: "\n\n######------ FASTQ-DUMP - SAMPLE = {wildcards.sample} ------######\n"
     shell:"""
         fastq-dump  \

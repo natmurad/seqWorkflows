@@ -10,8 +10,8 @@ rule prefetch:
         folder = INPUTDIR + "{sample}/",
         sra =  "{sample}",
         out_dir = INPUTDIR
-    singularity:
-        "docker://pegi3s/sratoolkit"
+    container:
+        SEQWORKFLOWS_CONTAINER
     message: "\n\n######------ DOWNLOADING RAW SEQUENCE DATA FROM SRA ------######\n"
     shell:"""
         prefetch \

@@ -11,8 +11,8 @@ rule transcoder_pred:
         gff3 = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.gff3",
         cds = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.cds",
         bed = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.bed"
-    singularity:
-        "docker://quay.io/biocontainers/transdecoder:5.7.0--pl5321hdfd78af_0"
+    container:
+        SEQWORKFLOWS_CONTAINER
     params:
         out = INPUTDIR + "transdecoder",
         t = THREADS

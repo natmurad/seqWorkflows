@@ -1,13 +1,21 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/seqWorkflows/config/configRefGuided.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configRefGuided.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
 import io 
-import os
 import pandas as pd
 import pathlib
 from snakemake.exceptions import print_exception, WorkflowError
@@ -26,11 +34,10 @@ STEP_CDHIT = config["step_cdhit"]
 STEP_ANNOTATION = config["step_annotation"]
 
 SAMPLES = config["samples"].split() # sample files
-LANE = config["lane"]
-NUM = config["reads"].split()
+LANE = str(config.get("lane") or "")
 FQ = config['fq']
 ADAPTERS = config['adapters']
-READS = config['reads']
+READS = str(config.get('reads') or "")
 CONTRAST = config["contrasts"].split() # contrasts files
 
 
@@ -65,49 +72,55 @@ rule all:
     input:
     ###------ QUALITY CONTROL ------###
 #     fastqc output before trimming
-        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        fastq_html = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}1_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_zip = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}1_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_html2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        fastq_zip2 = expand("{out_dir_name}fastqcRaw/{sample}{lane}_{reads}2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # fastqc output after trimming
-        trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
-      #  html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
-   #     zip_trim = expand("{out_dir_name}/fastqcTrim/{sample}{lane}_trimmed_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
+        trimmed = expand("{trim_dir}{sample}{lane}_{reads}1_trimmed.fq.gz", trim_dir=TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
+        trimmed2 = expand("{trim_dir}{sample}{lane}_{reads}2_trimmed.fq.gz", trim_dir=TRIMMEDDIR, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        zip_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}1_trimmed2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        html_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed2_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
+        zip_trim2 = expand("{out_dir_name}fastqcTrim/{sample}{lane}_{reads}2_trimmed2_fastqc.zip", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE, reads=READS),
     # merged reports before trimming
-      #  raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-       # trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
 
     ###------ SORTED ALIGN ------###
     # reference for alignments
-   #     rsemref = RSEMPREPREF + PREF + ".seq",
+        rsemref = RSEMPREPREF + PREF + ".seq",
     # star align
-   #     reads_map = expand("{out_dir}{sample}{lane}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
+        reads_map = expand("{out_dir}{sample}{lane}_{reads}Aligned.sortedByCoord.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE, reads=READS),
     # samtools merged sorted bam
-    #    mergedBam = ASSEMBLYDIR + "merged_sorted_bam.bam",
+        mergedBam = ASSEMBLYDIR + "merged_sorted_bam.bam",
 
     ###------ ASSEMBLY ------###
     # trinity assembly
-     #   assembly = ASSEMBLYDIR + ASSEMBLY,
+        assembly = ASSEMBLYDIR + ASSEMBLY,
     # cdhit
-    #    assemblyfilt = OUT_STEP_CDHIT + "NRCDS_Trinity.fasta.cdhit",
+        assemblyfilt = OUT_STEP_CDHIT + "NRCDS_Trinity.fasta.cdhit",
     # busco
-     #   busco = OUT_STEP_ANNOTATION + "busco/out/short_summary.specific.hymenoptera_odb10.out.txt",
+        busco = OUT_STEP_ANNOTATION + "busco/out/short_summary.specific.hymenoptera_odb10.out.txt",
 
 
     ###------ ANNOTATION ------###
     # transDecoder
-    #    long_orfs = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
-    #    pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
+        long_orfs = OUT_STEP_TRANSDECODER + "longest_orfs.pep",
+        pep = OUT_STEP_TRANSDECODER + ASSEMBLY + ".transdecoder.pep",
     # uniprot
-     #   uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
-     #   blastdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb",
+        uniprotdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta",
+        blastdb = OUT_STEP_DOWNLOAD + "uniprot_sprot.fasta.pdb",
     # blast
-    #    blastp = OUT_STEP_ANNOTATION + "uniprot.blastp.outfmt6",
-    #    blastx = OUT_STEP_ANNOTATION + "uniprot.blastx.outfmt6",
+        blastp = OUT_STEP_ANNOTATION + "uniprot.blastp.outfmt6",
+        blastx = OUT_STEP_ANNOTATION + "uniprot.blastx.outfmt6",
     # pfam
-    #   pfamdb = OUT_STEP_DOWNLOAD + "Pfam-A.hmm",
+        pfamdb = OUT_STEP_DOWNLOAD + "Pfam-A.hmm",
     # hmmscan
-     #   hmmscan = OUT_STEP_ANNOTATION + "TrinotatePFAM.out",
+        hmmscan = OUT_STEP_ANNOTATION + "TrinotatePFAM.out",
     # signal p
-     #   signalp = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt",
+        signalp = OUT_STEP_ANNOTATION + "signalp/prediction_results.txt",
     # trinotate
         sqlite = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
         xlsReport1 = OUT_STEP_ANNOTATION + "trinotate_annotation_reportv1.xls",
@@ -134,46 +147,51 @@ rule all:
 ###############################################################################
 #################          QUALITY REPORT RAW DATA          ###################
 ###############################################################################
-#include:	"rules/SE/fastqcRAW.smk"
+include:	"rules/PE/fastqcRAW.smk"
 
 ###############################################################################
 #########################          TRIMMING          ##########################
 ###############################################################################
-include:	"rules/SE/trimmomatic.smk"
+include:	"rules/PE/trimmomatic.smk"
+
+###############################################################################
+#########################          FASTP             ##########################
+###############################################################################
+include:	"rules/PE/fastp.smk"
 
 ###############################################################################
 ###############          QUALITY REPORT TRIMMED DATA          #################
 ###############################################################################
-#include:	"rules/SE/fastqcTRIM.smk"
+include:	"rules/PE/fastqcTRIM.smk"
 
 ###############################################################################
 ######################          MERGE REPORTS          ########################
 ###############################################################################
-#include:	"rules/BOTH/multiqc.smk"
+include:	"rules/PE/multiqc.smk"
 
 #>>>>>>>>>>>>>>------          ALIGN TO REFERENCE      --------<<<<<<<<<<<<<<<<
 
 ###############################################################################
 ######################        PREPARE INDEX            ########################
 ###############################################################################
-#include:	"rules/BOTH/rsemref.smk"
+include:	"rules/BOTH/rsemref.smk"
 
 ###############################################################################
 ######################        ALIGN TO REFERENCE       ########################
 ###############################################################################
-#include:	"rules/SE/starmap.smk"
+include:	"rules/PE/starmap.smk"
 
 ###############################################################################
 ######################        MERGE BAM FILES          ########################
 ###############################################################################
-#include:	"rules/BOTH/samtools_merge.smk"
+include:	"rules/BOTH/samtools_merge.smk"
 
 #>>>>>>>>>>>>>>------              ASSEMBLY            --------<<<<<<<<<<<<<<<<
 
 ###############################################################################
 ######################        TRINITY GUIDED ASSEMBLY  ########################
 ###############################################################################
-#include:	"rules/BOTH/trinity_genome_guided.smk"
+include:	"rules/BOTH/trinity_genome_guided.smk"
 
 ###############################################################################
 ######################          BOWTIE BUILD           ########################
@@ -188,19 +206,19 @@ include:	"rules/SE/trimmomatic.smk"
 ###############################################################################
 #####################             BUSCO                ########################
 ###############################################################################
-#include:	"rules/BOTH/busco.smk"
+include:	"rules/BOTH/busco.smk"
 
 ###############################################################################
 ###################               REMOVE REDUNDANCE      ######################
 ###############################################################################
-#include:	"rules/BOTH/cdhit.smk"
+include:	"rules/BOTH/cdhit.smk"
 
 #>>>>>>>>>>>>>>------      DIFFERENTIAL EXPRESSION     --------<<<<<<<<<<<<<<<<
 
 ###############################################################################
 ###################               COUNTS                 ######################
 ###############################################################################
-include:	"rules/SE/trinity_align_and_estimate_abundance.smk"
+include:	"rules/PE/trinity_align_and_estimate_abundance.smk"
 
 ###############################################################################
 ###################           ABUNDANCE TO MATRIX        ######################
@@ -217,52 +235,52 @@ include:	"rules/BOTH/trinity_run_DE_analysis.smk"
 ###############################################################################
 ###################           TRANSDECODER ORFS          ######################
 ###############################################################################
-#include:	"rules/BOTH/transDecoderOrf.smk"
+include:	"rules/BOTH/transDecoderOrf.smk"
 
 ###############################################################################
 ###################               PREDICT GENES          ######################
 ###############################################################################
-#include:	"rules/BOTH/transDecoderPred.smk"
+include:	"rules/BOTH/transDecoderPred.smk"
 
 ###############################################################################
 ###################               UNIPROT DB             ######################
 ###############################################################################
-#include:	"rules/BOTH/uniprotdb.smk"
+include:	"rules/BOTH/uniprotdb.smk"
 
 ###############################################################################
 ###################               BLAST DB             ######################
 ###############################################################################
-#include:	"rules/BOTH/blastuniprotdb.smk"
+include:	"rules/BOTH/blastuniprotdb.smk"
 
 ###############################################################################
 ###################                BLASTP                ######################
 ###############################################################################
-#include:	"rules/BOTH/blastp.smk"
+include:	"rules/BOTH/blastp.smk"
 
 ###############################################################################
 ###################                 BLASTX               ######################
 ###############################################################################
-#include:	"rules/BOTH/blastx.smk"
+include:	"rules/BOTH/blastx.smk"
 
 ###############################################################################
 ###################               PFAM DB        vvv     ######################
 ###############################################################################
-#include:	"rules/BOTH/pfamdb.smk"
+include:	"rules/BOTH/pfamdb.smk"
 
 ###############################################################################
 ###################               HMMER SCAN             ######################
 ###############################################################################
-#include:	"rules/BOTH/hmmscan.smk"
+include:	"rules/BOTH/hmmscan.smk"
 
 ###############################################################################
 ###################               SIGNAL P               ######################
 ###############################################################################
-#include:	"rules/BOTH/signalp.smk"
+include:	"rules/BOTH/signalp.smk"
 
 ###############################################################################
 ###################           BUILD DB                   ######################
 ###############################################################################
-include:	"rules/BOTH/trinotate_copy_db.smk"
+include:	"rules/BOTH/trinotate_builddb.smk"
 
 ###############################################################################
 ###################           ANNOTATION                 ######################

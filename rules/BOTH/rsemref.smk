@@ -7,17 +7,21 @@ rule prepare_ref:
         gtfFile = GTF_FILE,
         refGenome = REF_GENOME
     output:
-        RSEMPREPREF + PREF + ".seq"
+        f"{RSEMPREPREF}{PREF}.seq"
+    threads: THREADS
+    log:
+        f"{RSEMPREPREF}logs/rsem_prepare_reference.log"
     params:
         rsemRef = RSEMPREPREF,
-        t = THREADS,
         pref = PREF,
         gtf_gff = GTF_GFF,
-    singularity:
-        "docker://dceoy/rsem"
+        logdir = f"{RSEMPREPREF}logs/"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
-        cd {params.rsemRef}
+        mkdir -p {params.rsemRef} {params.logdir}
+        star_path="$(dirname "$(command -v STAR)")"
         rsem-prepare-reference {params.gtf_gff} {input.gtfFile} \
-        -p {params.t} --star --star-path /usr/local/bin/ \
-        {input.refGenome} {params.pref}
+        -p {threads} --star --star-path "$star_path" \
+        {input.refGenome} {params.rsemRef}{params.pref} > {log} 2>&1
     """

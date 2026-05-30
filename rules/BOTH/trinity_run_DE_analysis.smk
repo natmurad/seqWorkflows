@@ -15,8 +15,8 @@ rule run_DE_analysis:
     output:
         de = INPUTDIR + "diff_exp/DESeq2_gene/RSEM.gene.counts.matrix.{contrasts}.DESeq2.DE_results",
         de_mtx = INPUTDIR + "diff_exp/DESeq2_gene/RSEM.gene.counts.matrix.{contrasts}.DESeq2.count_matrix",
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.out_dir} &&
         /usr/local/bin/Analysis/DifferentialExpression/run_DE_analysis.pl \

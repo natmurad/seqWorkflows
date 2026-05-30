@@ -14,8 +14,8 @@ rule trinotate:
     params:
         dir = OUT_STEP_ANNOTATION
     message: "\n\n######------ ANNOTATION WITH TRINOTATE ------######\n"
-    singularity:
-        "docker://ss93/trinotate-3.2.1"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.dir} &&
         Trinotate {input.trinotatesqlite} init \

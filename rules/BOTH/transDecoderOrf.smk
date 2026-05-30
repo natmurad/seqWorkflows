@@ -11,8 +11,8 @@ rule transcoder_orf:
         gff3 = OUT_STEP_TRANSDECODER + "longest_orfs.gff3"
     params:
         out = INPUTDIR + "transdecoder"
-    singularity:
-        "docker://quay.io/biocontainers/transdecoder:5.7.0--pl5321hdfd78af_0"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         TransDecoder.LongOrfs -t {input.assembly} -O {params.out}
         """

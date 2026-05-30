@@ -11,8 +11,8 @@ rule bowtie2:
     params:
         t = THREADS,
         index = BTINDEX + "trinity",
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
-        bowtie2 --quiet -p {params.t} -x {params.index} -q --local --no-unal -U {input.reads} –S {output.map}
+        bowtie2 --quiet -p {params.t} -x {params.index} -q --local --no-unal -U {input.reads} -S {output.map}
     """

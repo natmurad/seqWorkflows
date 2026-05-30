@@ -17,8 +17,8 @@ rule trinity:
         mem = '50G',
         seqType = 'fq'
     message: "\n\n######------ ASSEMBLING WITH TRINITY ------######\n"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         Trinity --seqType {params.seqType} --CPU {params.t} \
             --max_memory {params.mem} \

@@ -17,8 +17,8 @@ rule counts:
         mtx = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
         barcode = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/features.tsv.gz",
         features = OUT_STEP_CELLRANGERMAP + "{sample}/outs/filtered_feature_bc_matrix/barcodes.tsv.gz",
-    singularity:
-        "docker://litd/docker-cellranger"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:'''
         cd {params.out} &&
         cellranger count --id={params.run} \

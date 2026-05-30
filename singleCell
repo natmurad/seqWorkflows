@@ -2,14 +2,22 @@
 ##########################          CONFIG          ###########################
 ###############################################################################
 
-configfile: "/home/user/seqWorkflows/config/configSC.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configSC.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
 
 import io
-import os
 import pandas as pd
 import pathlib
 from snakemake.exceptions import print_exception, WorkflowError
@@ -22,11 +30,18 @@ THREADS = config["threads"]
 
 STEP_CELLRANGERMAP = config["step_cellrangerMap"] # Cellranger indexing and mapping
 
-SAMPLES = config["samples"].split() # sample files
-LANE = config["lane"].split() # lane number
-READS = config["reads"].split()
-READSSC = config["readssc"].split()
-FQ = config["fq"].split()
+def as_list(value):
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return str(value).split()
+
+SAMPLES = as_list(config["samples"]) # sample files
+LANE = as_list(config.get("lane")) # lane number
+READS = as_list(config.get("reads"))
+READSSC = as_list(config.get("readssc"))
+FQ = as_list(config.get("fq"))
 
 INPUTDIR = config["raw_data_dir"] # /home/user/
 CELLRANGERINDEXDIR = config['crindexdir']

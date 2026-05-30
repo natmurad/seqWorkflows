@@ -14,8 +14,8 @@ rule run_GOseq:
     message: "\n\n######------ RUNNING GO ANALYSIS ------######\n"
     output:
         log = INPUTDIR + "diff_exp/DESeq2_gene/go/{contrasts}/{contrasts}GODONE.txt"
-    singularity:
-        "docker://trinityrnaseq/trinityrnaseq"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
             cd {params.go_dir} &&
             /usr/local/bin/Analysis/DifferentialExpression/run_GOseq.pl \

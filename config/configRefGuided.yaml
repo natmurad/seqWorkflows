@@ -43,7 +43,7 @@ raw_data_dir: /home/user/rnaseq/specie/
 trimmed_dir: /home/user/rnaseq/specie/trimmed/
 
 # Path to assembly output
-assembly_dir:/home/user/rnaseq/specie/assembly_trinity/trinity/
+assembly_dir: /home/user/rnaseq/specie/assembly_trinity/trinity/
 
 # Assembly file name
 assembly_name: Trinity-GG.fasta

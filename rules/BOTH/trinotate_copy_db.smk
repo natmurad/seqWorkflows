@@ -10,8 +10,8 @@ rule copy_db:
     output:
         trinotatesqlite_cp = OUT_STEP_ANNOTATION + "Trinotate.sqlite",
     message: "\n\n######------ DOWNLOAD TRINOTATE SQLITE DB ------######\n"
-    singularity:
-        "docker://trinityrnaseq/trinotate"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cp data/Trinotate.sqlite {output.trinotatesqlite_cp}
         """

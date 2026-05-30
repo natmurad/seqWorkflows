@@ -11,8 +11,8 @@ rule BUSCO:
         t = THREADS,
         out = OUT_STEP_ANNOTATION + "/busco"
     message: "\n\n######------ BUSCO - Benchmarking sets of Universal Single-Copy Orthologs ------######\n"
-    singularity:
-        "docker://ezlabgva/busco:v5.4.4_cv1"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.out} &&
         busco \

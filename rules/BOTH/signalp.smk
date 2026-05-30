@@ -11,8 +11,8 @@ rule signalp:
         od = OUT_STEP_ANNOTATION + "signalp/",
         org = "euk"
     message: "\n\n######------ PREDICTING SINAL PEPTIDES AND TRANSMEMBRANE DOMAINS WITH SIGNAL P ------######\n"
-    singularity:
-        "docker://aswaffordlbl/signalp6"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         signalp6  --fastafile {input.pep} \
         --output_dir {params.od}  --organism {params.org} \

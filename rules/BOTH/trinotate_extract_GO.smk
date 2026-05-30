@@ -10,8 +10,8 @@ rule extract_go:
     params:
         dir = OUT_STEP_ANNOTATION
     message: "\n\n######------ EXTRACTING GO ASSIGNMENTS ------######\n"
-    singularity:
-        "docker://trinityrnaseq/trinotate"
+    container:
+        SEQWORKFLOWS_CONTAINER
     shell:"""
         cd {params.dir} &&
         /usr/local/src/Trinotate/util/extract_GO_assignments_from_Trinotate_xls.pl \

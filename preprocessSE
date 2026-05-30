@@ -1,12 +1,20 @@
 ###############################################################################
 ##########################          CONFIG          ###########################
 ###############################################################################
-configfile: "/home/user/seqWorkflows/config/configPreprocess.yaml"
+import os
+
+CONFIGFILE = os.environ.get("SEQWORKFLOWS_CONFIG", "config/configPreprocessSE.yaml")
+
+configfile: CONFIGFILE
+
+SEQWORKFLOWS_CONTAINER = config.get(
+    "container",
+    os.environ.get("SEQWORKFLOWS_CONTAINER", "docker://seqworkflows:latest"),
+)
 
 ###############################################################################
 ########################          LIBRARIES          ##########################
 ###############################################################################
-import os
 import shutil
 import time
 
@@ -27,15 +35,28 @@ STEP_COUNTS = config["step_counts"] # quantify counts
 
 SAMPLES = config["samples"].split() # sample files
 #SRALIST = config["sralist"]
-LANE = config["lane"]
-NUM = config["reads"].split()
+LANE = str(config.get("lane") or "")
 FQ = config["fq"]
-READS = config["reads"].split()
+READS = str(config.get("reads") or "")
 ADAPTERS = config["adapters"] # adapters sequences
 REF_GENOME = config["ref_genome"]
 GTF_FILE = config["gtf_file"]
 GTF_GFF = config["gtf_gff"]
 PREF = config["prefix_ref"]
+STRANDEDNESS = config.get("strandedness", config.get("strandness", "reverse"))
+RSEM_FORWARD_PROB = {
+    "unstranded": "0.5",
+    "forward": "1",
+    "reverse": "0",
+}
+
+if STRANDEDNESS not in RSEM_FORWARD_PROB:
+    raise ValueError(
+        f"Invalid strandedness '{STRANDEDNESS}'. Use one of: "
+        f"{', '.join(RSEM_FORWARD_PROB)}"
+    )
+
+RSEM_FORWARD_PROB_VALUE = RSEM_FORWARD_PROB[STRANDEDNESS]
 
 INPUTDIR = config["raw_data_dir"] #  /home/dataset/raw_data - fastq reads
 DIR = config["base_dir"] # /home/user/
@@ -59,12 +80,12 @@ rule all:
         trimmed = expand("{trim_dir}{sample}{lane}_trimmed.fq.gz", trim_dir = TRIMMEDDIR, sample=SAMPLES, lane=LANE),
         html_trim = expand("{out_dir_name}fastqcTrim/{sample}{lane}_trimmed_fastqc.html", out_dir_name=OUT_STEP_QC, sample=SAMPLES, lane=LANE),
    # merged reports before trimming
-        raw_html = OUT_STEP_QC + "fastqcRaw/multiqc_report.html",
+        raw_html = f"{OUT_STEP_QC}fastqcRaw/multiqc_report.html",
     # merged reports after trimming
-        trim_html = OUT_STEP_QC + "fastqcTrim/multiqc_report.html",
+        trim_html = f"{OUT_STEP_QC}fastqcTrim/multiqc_report.html",
     ###------ PREPARE REFERENCE ------###
     # reference for alignments
-        rsemref = RSEMPREPREF + PREF + ".seq",
+        rsemref = f"{RSEMPREPREF}{PREF}.seq",
     ###------ MAP TO THE REFERENCE ------###
     # star align
         reads_map = expand("{out_dir}{sample}{lane}Aligned.toTranscriptome.out.bam", out_dir = OUT_STEP_MAP, sample=SAMPLES, lane=LANE),
@@ -120,4 +141,3 @@ onsuccess:
     print("########------ PREPROCESSING FINISHED! ------##########\n")
     print("#######################################################\n")
     print("\n\nRunning time in minutes: %s\n" % round((time.time() - start)/60,1))
-    shutil.rmtree(".snakemake")

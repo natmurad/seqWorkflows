@@ -16,8 +16,8 @@ rule multiqc_report:
     params:
         outdirRaw = OUT_STEP_QC + "fastqcRaw/",
         outdirTrim = OUT_STEP_QC + "fastqcTrim/"
-    singularity:
-        "docker://staphb/multiqc"
+    container:
+        SEQWORKFLOWS_CONTAINER
     message: "\n\n######------ MERGING QUALITY REPORTS ------######\n"
     # run to raw data
     # run to trimmed data
